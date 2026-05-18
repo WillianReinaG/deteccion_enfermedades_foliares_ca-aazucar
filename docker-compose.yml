@@ -17,6 +17,7 @@ services:
     command: ["streamlit"]
     ports:
       - "8501:8501"
+    restart: unless-stopped
     env_file:
       - path: .env
         required: false

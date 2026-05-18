@@ -23,12 +23,13 @@ COPY src ./src
 COPY tests ./tests
 COPY data ./data
 COPY docker/entrypoint.sh /app/docker/entrypoint.sh
-RUN chmod +x /app/docker/entrypoint.sh
+# Normaliza CRLF (Windows) para evitar "no such file or directory" en Linux
+RUN sed -i 's/\r$//' /app/docker/entrypoint.sh && chmod +x /app/docker/entrypoint.sh
 
 # Artefactos y modelo se montan en runtime (no van en la imagen por tamaño)
 RUN mkdir -p /app/models /app/artifacts
 
 EXPOSE 8501
 
-ENTRYPOINT ["/app/docker/entrypoint.sh"]
+ENTRYPOINT ["/bin/sh", "/app/docker/entrypoint.sh"]
 CMD ["test"]

@@ -46,9 +46,14 @@ python src/scripts/prepare_artifacts.py --exp-root "RUTA/sugarcane_multimodel_20
 # Tests en contenedor
 docker compose run --rm test
 
-# App Streamlit
+# App Streamlit (primera vez: build puede tardar varios minutos)
+docker compose build app
 docker compose up app
 ```
+
+Abrir **http://localhost:8501**. Si en Windows ves `entrypoint.sh: no such file or directory`, reconstruir sin caché: `docker compose build --no-cache app`.
+
+El `best.pt` debe estar en `models/` del host (se monta como volumen).
 
 Entrypoint (`docker/entrypoint.sh`): `test` | `lint` | `streamlit` | `train` | `validate` | `monitor`
 
