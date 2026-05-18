@@ -4,10 +4,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BASE_DIR = Path(__file__).resolve().parents[2]
+BASE_DIR = Path(__file__).resolve().parents[3]
 MODEL_DIR = BASE_DIR / os.getenv("MODEL_DIR", "models")
 ARTIFACTS_DIR = BASE_DIR / os.getenv("ARTIFACTS_DIR", "artifacts")
-KNOWLEDGE_DIR = BASE_DIR / os.getenv("KNOWLEDGE_DIR", "app/knowledge_base")
+KNOWLEDGE_DIR = BASE_DIR / os.getenv("KNOWLEDGE_DIR", "src/app/knowledge_base")
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")

@@ -1,0 +1,10 @@
+**/.git
+**/.venv
+**/venv
+**/__pycache__
+**/*.pyc
+.env
+*.pt
+*.pth
+data/conversations/*.json
+.github

@@ -10,3 +10,6 @@ venv/
 chroma_db/
 logs/
 .DS_Store
+data/conversations/*.json
+data/monitoring/*.json
+!data/monitoring/.gitkeep

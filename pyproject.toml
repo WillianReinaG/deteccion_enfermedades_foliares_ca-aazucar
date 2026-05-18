@@ -1,0 +1,12 @@
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = ["E501", "E402", "I001", "E401", "F401"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/app/ui/streamlit_app.py" = ["E402"]
+"src/scripts/*" = ["E402"]

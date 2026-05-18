@@ -1,0 +1,26 @@
+services:
+  # CI local: docker compose run --rm test
+  test:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    command: ["test"]
+    volumes:
+      - ./models:/app/models:ro
+      - ./artifacts:/app/artifacts:ro
+
+  # App: docker compose up app
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    command: ["streamlit"]
+    ports:
+      - "8501:8501"
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - ./models:/app/models:ro
+      - ./artifacts:/app/artifacts:ro
+      - ./data/conversations:/app/data/conversations

@@ -39,7 +39,7 @@ def _json_safe(value: Any) -> Any:
             pass
     return str(value)
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 HISTORY_DIR = ROOT / "data" / "conversations"
 HISTORY_DIR.mkdir(parents=True, exist_ok=True)
 

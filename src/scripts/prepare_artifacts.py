@@ -12,7 +12,7 @@ parser.add_argument("--exp-root", required=True, help="Carpeta sugarcane_multimo
 args = parser.parse_args()
 
 root = Path(args.exp_root)
-project = Path(__file__).resolve().parents[1]
+project = Path(__file__).resolve().parents[2]
 models_dir = project / "models"
 artifacts_dir = project / "artifacts"
 models_dir.mkdir(exist_ok=True)

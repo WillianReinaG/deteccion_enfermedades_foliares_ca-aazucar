@@ -1,0 +1,102 @@
+name: MLOps Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: Etapa a ejecutar
+        required: true
+        type: choice
+        options:
+          - all
+          - train
+          - validate
+          - deploy
+          - monitor
+      exp_root:
+        description: Carpeta del experimento (EXP_ROOT) para entrenamiento
+        required: false
+        type: string
+  schedule:
+    - cron: "0 6 * * 0"
+
+jobs:
+  mlops:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build imagen
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          load: true
+          tags: sugarcane-mlops:local
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Entrenamiento
+        if: >-
+          github.event_name == 'workflow_dispatch' &&
+          (inputs.stage == 'train' || inputs.stage == 'all')
+        run: |
+          docker run --rm \
+            -e EXP_ROOT="${{ inputs.exp_root }}" \
+            -v "${{ github.workspace }}/artifacts:/app/artifacts" \
+            -v "${{ github.workspace }}/models:/app/models" \
+            sugarcane-mlops:local train
+
+      - name: Validación
+        if: >-
+          (github.event_name == 'workflow_dispatch' &&
+           (inputs.stage == 'validate' || inputs.stage == 'all')) ||
+          github.event_name == 'schedule'
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}/artifacts:/app/artifacts" \
+            -v "${{ github.workspace }}/models:/app/models" \
+            -v "${{ github.workspace }}/data:/app/data" \
+            sugarcane-mlops:local validate
+
+      - name: Monitoreo
+        id: monitor
+        if: >-
+          github.event_name == 'schedule' ||
+          (github.event_name == 'workflow_dispatch' &&
+           (inputs.stage == 'monitor' || inputs.stage == 'all'))
+        continue-on-error: true
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}/data:/app/data" \
+            -v "${{ github.workspace }}/artifacts:/app/artifacts" \
+            -v "${{ github.workspace }}/models:/app/models" \
+            sugarcane-mlops:local monitor || true
+          if [ -f data/monitoring/monitor_report.json ]; then
+            RETRAIN=$(python -c "import json; print(json.load(open('data/monitoring/monitor_report.json'))['retrain_recommended'])")
+            echo "should_retrain=$RETRAIN" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Recomendación de retraining
+        if: steps.monitor.outputs.should_retrain == 'True'
+        run: |
+          echo "::warning::Se recomienda retraining. Ejecute MLOps con stage=train y EXP_ROOT configurado."
+
+      - name: Despliegue Streamlit (instrucciones)
+        if: >-
+          github.event_name == 'workflow_dispatch' &&
+          (inputs.stage == 'deploy' || inputs.stage == 'all')
+        run: |
+          echo "Imagen: ghcr.io/${{ github.repository }}:latest"
+          echo "docker compose up app  # local"
+          echo "Montar models/ y artifacts/ en el host."
+
+      - name: Subir reportes de monitoreo
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlops-reports
+          path: data/monitoring/
+          if-no-files-found: ignore
