@@ -1,0 +1,9 @@
+flowchart LR
+A[Usuario carga imagen] --> B[Frontend Streamlit]
+B --> C[Predictor]
+C --> D[Mejor modelo entrenado best.pt]
+C --> E[Clase + confianza]
+E --> F[Agente IA]
+G[Base de conocimiento caña de azúcar] --> H[RAG Retriever]
+H --> F
+F --> I[Respuesta: diagnóstico, síntomas, mitigación, prevención]

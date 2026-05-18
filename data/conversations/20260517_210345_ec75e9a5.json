@@ -1,0 +1,18 @@
+[
+  {
+    "role": "assistant",
+    "content": "Imagen clasificada como Healthy con confianza 97.17%."
+  },
+  {
+    "role": "user",
+    "content": "hablame un poco acerca de la imagen cargada"
+  },
+  {
+    "role": "assistant",
+    "content": "**Respuesta del agente con RAG local**\n\nLa conversación se mantiene con histórico local y la imagen actual fue clasificada como **Healthy** con confianza aproximada de **97.17%**. Este resultado es apoyo de IA y debe confirmarse con observación de campo.\n\n**Evidencia recuperada de la base de conocimiento:**\n- **hoja_sana_healthy_cana.md**: # Hoja sana de caña de azúcar (Healthy) Una clasificación como Healthy indica que, según el modelo de visión, la hoja no presenta rasgos visuales fuertes de las enfermedades entrenadas. Sin embargo, no descarta problemas iniciales, enfermedades no incluidas en el dataset, daños no visibles en la imagen o síntomas en otras partes de la planta. ## Señales de buen estado visual - Coloración verde esperada para la variedad y edad. - Ausencia de manchas, pústulas, mosaicos o necrosis relevantes. - Lá...\n- **enfermedades_cana_azucar.md**: # Base de conocimiento inicial: enfermedades foliares en caña de azúcar ## Healthy Una hoja clasificada como Healthy no presenta patrones evidentes de enfermedad en la imagen. Aun así, se recomienda monitoreo periódico, revisión de humedad, nutrición, drenaje y presencia de insectos vectores. ## Mosaic El mosaico de la caña de azúcar suele asociarse con patrones irregulares de verde claro y verde oscuro en la hoja. Puede estar relacionado con virus y con material vegetal infectado. Acciones reco...\n- **manejo_integrado_enfermedades_cana.md**: ado: monitoreo, higiene, material vegetal sano, eliminación de focos severos, manejo de vectores, nutrición balanceada y drenaje. 6. Escalar a laboratorio o agrónomo cuando el daño avance, existan pérdidas productivas, haya dudas entre enfermedad y estrés nutricional, o se requieran decisiones de control químico. ## Prevención general - Usar semilla o material de propagación sano. - Elegir variedades adaptadas y con tolerancia a enfermedades prevalentes. - Evitar mover material vegetal sospechos...\n- **manejo_integrado_enfermedades_cana.md**: # Manejo integrado de enfermedades foliares en caña de azúcar El diagnóstico de enfermedades en caña de azúcar debe combinar inspección visual, historial del lote, variedad sembrada, condiciones ambientales, edad del cultivo, manejo nutricional y confirmación técnica cuando sea necesario. Una predicción por imagen es útil como alerta temprana, pero no reemplaza una evaluación fitosanitaria en campo. ## Flujo recomendado ante una alerta de IA 1. Confirmar si el síntoma aparece en una sola hoja, v...\n\n**Orientación práctica:**\n- Compare la predicción con síntomas visibles en varias hojas y sectores del lote.\n- Revise patrón de avance, edad del cultivo, variedad, humedad, drenaje, nutrición y presencia de vectores.\n- Use material vegetal sano, monitoreo frecuente y manejo integrado antes de tomar decisiones de control.\n- Si la afectación aumenta, consulte a un agrónomo o laboratorio fitosanitario."
+  },
+  {
+    "role": "assistant",
+    "content": "Imagen clasificada como Yellow con confianza 95.27%."
+  }
+]

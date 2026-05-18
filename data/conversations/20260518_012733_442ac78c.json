@@ -1,0 +1,18 @@
+[
+  {
+    "role": "assistant",
+    "content": "Imagen clasificada como RedRot con confianza 94.65%."
+  },
+  {
+    "role": "user",
+    "content": "explícame la enfermedad detectada sus síntomas, manejo y prevención"
+  },
+  {
+    "role": "assistant",
+    "content": "**Respuesta basada en la base de conocimiento local**\n\nLa imagen fue clasificada como **RedRot** (94.7% de confianza). Esto es apoyo de IA, no un diagnóstico de campo.\n\n**Información recuperada relevante a su consulta:**\n- (podredumbre_roja_redrot_cana.md) La podredumbre roja es una enfermedad importante que puede afectar tallos y tejidos internos de la caña.\n- (podredumbre_roja_redrot_cana.md) Aunque una imagen foliar puede sugerir alerta, la confirmación suele requerir revisar tallos, entrenudos y síntomas internos.\n- (podredumbre_roja_redrot_cana.md) Puede causar deterioro del tejido y pérdidas si no se controla oportunamente.\n- (podredumbre_roja_redrot_cana.md) - Mejorar drenaje y reducir estrés del cultivo.\n- (podredumbre_roja_redrot_cana.md) - Consultar a laboratorio/agronomía para confirmación, especialmente si la IA predice RedRot con baja confianza o solo desde imagen de hoja.\n- (podredumbre_roja_redrot_cana.md) - Manejo inadecuado de residuos infectados.\n\n**Recomendación:** valide síntomas en varias hojas y sectores del lote. Si la afectación progresa, consulte a un agrónomo o laboratorio fitosanitario."
+  },
+  {
+    "role": "assistant",
+    "content": "Imagen clasificada como Healthy con confianza 58.34%."
+  }
+]
