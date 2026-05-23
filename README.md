@@ -14,7 +14,7 @@ Repositorio: [deteccion_enfermedades_foliares_ca-aazucar](https://github.com/Wil
 ├── data/                   # Conversaciones y reportes de monitoreo
 ├── tests/                  # Pruebas unitarias
 ├── docker/                 # Dockerfile y entrypoint
-├── models/                 # Pesos (.pt) — no van a Git
+├── models/                 # Pesos best.pt (local, no van a Git)
 ├── artifacts/              # Leaderboards y metadatos
 ├── .github/workflows/      # CI, CD y MLOps
 ├── requirements.txt
@@ -22,77 +22,121 @@ Repositorio: [deteccion_enfermedades_foliares_ca-aazucar](https://github.com/Wil
 └── docker-compose.yml
 ```
 
-## Desarrollo local
+## Puesta en marcha completa
+
+### Prerrequisitos
+
+- Python 3.11+
+- Docker Desktop (recomendado)
+- Git
+- `models/best.pt` en la carpeta del proyecto (copia local del modelo entrenado)
+
+### 1. Configurar IA generativa (OpenAI)
+
+```powershell
+cd "C:\Users\bebes\Documents\MIAA\3.SEMESTRE\3.proyecto_tres\el proyecto\DATA2\SugarCane ProyectoFinal"
+copy .env.example .env
+```
+
+Edite `.env` y agregue su clave:
+
+```env
+OPENAI_API_KEY=sk-su_clave_aqui
+OPENAI_MODEL=gpt-4o-mini
+```
+
+> `.env` no se sube a GitHub. Sin `OPENAI_API_KEY`, el chat usa modo RAG extractivo local.
+
+### 2. Arranque con Docker (recomendado)
+
+```powershell
+docker compose build app
+docker compose up app
+```
+
+Abrir **http://localhost:8501**
+
+El sidebar debe mostrar **Motor de respuesta: OpenAI (gpt-4o-mini)** si la clave está configurada.
+
+### 3. Arranque local (alternativa)
 
 ```powershell
 python -m venv .venv
 .venv\Scripts\activate
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 pip install -r requirements.txt -r requirements-dev.txt
-pytest -q
-ruff check src tests
 streamlit run src/app/ui/streamlit_app.py
 ```
 
-### Copiar modelo entrenado
+### 4. Probar la aplicación
+
+1. Subir imagen de hoja → **Clasificar hoja** (requiere `models/best.pt`).
+2. Pregunta válida: *"Explícame la enfermedad detectada, síntomas y manejo en campo"*.
+3. Pregunta fuera de dominio: *"¿Quién ganó el mundial?"* → debe rechazar educadamente.
+4. Verificar sidebar: modelo cargado + motor OpenAI.
+
+### 5. Verificar pruebas y CI/CD
 
 ```powershell
-python src/scripts/prepare_artifacts.py --exp-root "RUTA/sugarcane_multimodel_2026"
-```
+# Tests locales
+python -m pytest -q
 
-## Docker
-
-```powershell
-# Tests en contenedor
+# Tests en contenedor (igual que GitHub Actions)
 docker compose run --rm test
-
-# App Streamlit (primera vez: build puede tardar varios minutos)
-docker compose build app
-docker compose up app
 ```
 
-Abrir **http://localhost:8501**. Si en Windows ves `entrypoint.sh: no such file or directory`, reconstruir sin caché: `docker compose build --no-cache app`.
-
-El `best.pt` debe estar en `models/` del host (se monta como volumen).
-
-Entrypoint (`docker/entrypoint.sh`): `test` | `lint` | `streamlit` | `train` | `validate` | `monitor`
-
-## CI/CD (GitHub Actions)
+GitHub Actions: https://github.com/WillianReinaG/deteccion_enfermedades_foliares_ca-aazucar/actions
 
 | Workflow | Disparador | Qué hace |
 |----------|------------|----------|
 | `ci.yml` | push / PR | Ruff, pytest, build Docker, tests en contenedor |
 | `cd-publish.yml` | push a `main` | Build, smoke test, publica en **GHCR** |
-| `mlops.yml` | manual / cron semanal | train → validate → monitor → deploy |
+| `mlops.yml` | manual / cron | train → validate → monitor → deploy |
 
-### Imagen publicada (GHCR)
+## Modelo entrenado
+
+Si ya tiene `models/best.pt` en su PC, no necesita scripts adicionales.
+
+Opcional (solo si copia artefactos desde una carpeta de entrenamiento externa):
+
+```powershell
+python src/scripts/prepare_artifacts.py --exp-root "RUTA_A_carpeta_de_resultados"
+```
+
+## Docker — referencia rápida
+
+```powershell
+docker compose run --rm test    # tests
+docker compose up app             # Streamlit en :8501
+docker compose down               # detener
+```
+
+Si en Windows aparece `entrypoint.sh: no such file or directory`:
+
+```powershell
+docker compose build --no-cache app
+```
+
+## Imagen publicada (GHCR)
 
 ```text
 ghcr.io/willianreinag/deteccion_enfermedades_foliares_ca-aazucar:latest
 ```
 
-```powershell
-docker pull ghcr.io/willianreinag/deteccion_enfermedades_foliares_ca-aazucar:latest
-docker run --rm -p 8501:8501 `
-  -v "${PWD}/models:/app/models:ro" `
-  -v "${PWD}/artifacts:/app/artifacts:ro" `
-  ghcr.io/willianreinag/deteccion_enfermedades_foliares_ca-aazucar:latest streamlit
-```
+## Agente agronómico (IA generativa)
 
-Tras el primer push a `main`, en GitHub: **Packages** → hacer el paquete **público** si quieres `docker pull` sin login.
+El prompt en `src/app/rag/generator.py` instruye al agente a:
+
+- Responder **solo** con evidencia RAG + histórico + predicción de imagen.
+- Usar tono profesional de agrónomo especialista en caña de azúcar.
+- Rechazar preguntas fuera de dominio o sin evidencia documental.
+- No presentar la clasificación visual como diagnóstico definitivo.
+
+Prioridad de motores: **OpenAI** → Ollama (si no hay OpenAI) → RAG extractivo local.
 
 ## MLOps (iteración)
 
-1. **Entrenamiento**: notebook local → `EXP_ROOT` en workflow o `python src/scripts/mlops/train.py`
-2. **Validación**: comprueba artefactos y carga del predictor → `data/monitoring/validation_report.json`
-3. **Monitoreo**: heurística de retraining → `data/monitoring/monitor_report.json`
-4. **Despliegue**: `docker compose up app` o imagen GHCR con volúmenes `models/` y `artifacts/`
-
-Disparo manual: **Actions** → **MLOps Pipeline** → elegir etapa (`train`, `validate`, `monitor`, `deploy`, `all`).
-
-## Variables de entorno
-
-Copie `.env.example` a `.env` (OpenAI / Ollama opcionales).
+Disparo manual: **Actions** → **MLOps Pipeline** → etapa `validate`, `monitor` o `all`.
 
 ## Nota
 

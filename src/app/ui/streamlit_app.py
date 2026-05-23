@@ -11,6 +11,7 @@ import pandas as pd
 from app.classifier.predictor import SugarCanePredictor
 from app.agent.agent import SugarCaneAgent
 from app.memory.conversation_store import new_session_id, load_history, save_history, clear_history, list_sessions
+from app.rag.generator import get_active_llm_label
 
 st.set_page_config(page_title="SugarCane AI Agent", page_icon="🌱", layout="wide")
 
@@ -40,6 +41,10 @@ with st.sidebar:
     st.write(f"**Checkpoint:** `{predictor.ckpt_path}`")
     if predictor.demo_mode:
         st.warning("Modo demo: no se encontró un peso entrenado. Copia el `best.pt` en `models/` o los artefactos en `artifacts/`.")
+
+    st.divider()
+    st.header("Motor de respuesta")
+    st.info(get_active_llm_label())
 
     st.divider()
     st.header("Memoria conversacional")
