@@ -12,4 +12,6 @@ logs/
 .DS_Store
 data/conversations/*.json
 data/monitoring/*.json
+data/predictions/*.jsonl
+!data/predictions/.gitkeep
 !data/monitoring/.gitkeep

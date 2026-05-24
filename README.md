@@ -24,7 +24,7 @@ Repositorio: [deteccion_enfermedades_foliares_ca-aazucar](https://github.com/Wil
 
 ## Puesta en marcha completa
 
-### Prerrequisitos
+### Pre requisitos
 
 - Python 3.11+
 - Docker Desktop (recomendado)
@@ -91,6 +91,7 @@ GitHub Actions: https://github.com/WillianReinaG/deteccion_enfermedades_foliares
 |----------|------------|----------|
 | `ci.yml` | push / PR | Ruff, pytest, build Docker, tests en contenedor |
 | `cd-publish.yml` | push a `main` | Build, smoke test, publica en **GHCR** |
+| `cd-dockerhub.yml` | push a `main` | Build, smoke test, publica en **Docker Hub** |
 | `mlops.yml` | manual / cron | train → validate → monitor → deploy |
 
 ## Modelo entrenado
@@ -122,6 +123,47 @@ docker compose build --no-cache app
 ```text
 ghcr.io/willianreinag/deteccion_enfermedades_foliares_ca-aazucar:latest
 ```
+
+## Imagen publicada (Docker Hub)
+
+Requiere secrets `DOCKERHUB_USERNAME` y `DOCKERHUB_TOKEN` en GitHub Actions.
+
+```text
+willianalbertorein/trabajofinalproyecto3:latest
+```
+
+Ejecutar desde cualquier PC (con `models/best.pt` local o descargado de GCS):
+
+```powershell
+docker login
+docker pull willianalbertorein/trabajofinalproyecto3:latest
+docker run -p 8501:8501 `
+  -v "${PWD}/models:/app/models:ro" `
+  -v "${PWD}/artifacts:/app/artifacts:ro" `
+  -v "${PWD}/data/predictions:/app/data/predictions" `
+  --env-file .env `
+  willianalbertorein/trabajofinalproyecto3:latest streamlit
+```
+
+## Alertas e informes por correo
+
+Configure en `.env`:
+
+```env
+SENDGRID_API_KEY=SG.xxxx
+ALERT_EMAIL=bebesowi@gmail.com
+ALERT_CONFIDENCE_MIN=0.5
+```
+
+- **Alerta inmediata**: al clasificar una hoja con enfermedad (clase ≠ Healthy) y confianza ≥ umbral.
+- **Registro local**: `data/predictions/predictions.jsonl` (BigQuery cuando configure `GCP_PROJECT_ID`).
+- **Informe diario manual**:
+
+```powershell
+docker compose run --rm app daily-report
+```
+
+Guía cloud completa: [docs/GCP_SETUP.md](docs/GCP_SETUP.md) (Cloud Run, BigQuery, Scheduler 18:00 America/Bogota).
 
 ## Agente agronómico (IA generativa)
 

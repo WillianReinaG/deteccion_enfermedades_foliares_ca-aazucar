@@ -32,6 +32,10 @@ case "${1:-test}" in
     shift
     exec python /app/src/scripts/mlops/monitor.py "$@"
     ;;
+  daily-report)
+    shift
+    exec python /app/src/scripts/gcp/daily_report.py "$@"
+    ;;
   *)
     exec "$@"
     ;;

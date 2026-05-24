@@ -12,6 +12,8 @@ from app.classifier.predictor import SugarCanePredictor
 from app.agent.agent import SugarCaneAgent
 from app.memory.conversation_store import new_session_id, load_history, save_history, clear_history, list_sessions
 from app.rag.generator import get_active_llm_label
+from app.services.alert_service import alerts_configured, is_disease, send_immediate_alert
+from app.services.prediction_logger import log_prediction
 
 st.set_page_config(page_title="SugarCane AI Agent", page_icon="🌱", layout="wide")
 
@@ -47,6 +49,13 @@ with st.sidebar:
     st.info(get_active_llm_label())
 
     st.divider()
+    st.header("Alertas por correo")
+    if alerts_configured():
+        st.success("SendGrid configurado — alertas activas")
+    else:
+        st.warning("Configure SENDGRID_API_KEY y ALERT_EMAIL en .env para alertas.")
+
+    st.divider()
     st.header("Memoria conversacional")
     st.caption(f"Sesión actual: `{st.session_state.session_id}`")
     if st.button("Nueva conversación"):
@@ -78,6 +87,11 @@ with col1:
         st.image(image, caption="Imagen cargada", use_container_width=True)
         if st.button("Clasificar hoja", type="primary"):
             pred = predictor.predict(image)
+            log_prediction(pred, session_id=st.session_state.session_id)
+            if is_disease(pred):
+                sent = send_immediate_alert(pred, session_id=st.session_state.session_id)
+                if sent:
+                    st.toast("Alerta enviada por correo", icon="📧")
             st.session_state["prediction"] = pred
             agent.set_prediction(pred)
             resumen = f"Imagen clasificada como {pred['class_name']} con confianza {pred['confidence']:.2%}."

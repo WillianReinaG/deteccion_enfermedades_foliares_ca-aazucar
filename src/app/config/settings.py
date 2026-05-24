@@ -14,5 +14,14 @@ OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:3b")
 
+SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "").strip()
+ALERT_EMAIL = os.getenv("ALERT_EMAIL", "bebesowi@gmail.com").strip()
+ALERT_FROM = os.getenv("ALERT_FROM", "noreply@sugarcane.local").strip()
+ALERT_CONFIDENCE_MIN = float(os.getenv("ALERT_CONFIDENCE_MIN", "0.5"))
+
+GCP_PROJECT_ID = os.getenv("GCP_PROJECT_ID", "").strip()
+BQ_DATASET = os.getenv("BQ_DATASET", "sugarcane")
+BQ_TABLE = os.getenv("BQ_TABLE", "predictions")
+
 CLASS_NAMES_DEFAULT = ["Bacterial Blight","Healthy", "Mosaic", "RedRot", "Rust", "Yellow"]
 IMG_SIZE = 224

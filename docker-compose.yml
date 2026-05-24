@@ -25,3 +25,4 @@ services:
       - ./models:/app/models:ro
       - ./artifacts:/app/artifacts:ro
       - ./data/conversations:/app/data/conversations
+      - ./data/predictions:/app/data/predictions
