@@ -20,7 +20,7 @@ def main() -> int:
     args = parser.parse_args()
 
     if not alerts_configured():
-        print("ERROR: Configure SENDGRID_API_KEY y ALERT_EMAIL en .env", file=sys.stderr)
+        print("ERROR: Configure SMTP_USER, SMTP_APP_PASSWORD y ALERT_EMAIL en .env", file=sys.stderr)
         return 1
 
     rows = load_predictions_last_hours(args.hours)

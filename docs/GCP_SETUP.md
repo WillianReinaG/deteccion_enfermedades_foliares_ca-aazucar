@@ -142,4 +142,4 @@ Esto crea:
 docker compose run --rm app daily-report
 ```
 
-Requiere `.env` con `SENDGRID_API_KEY` y predicciones en `data/predictions/predictions.jsonl`.
+Requiere `.env` con `SMTP_USER`, `SMTP_APP_PASSWORD` y predicciones en `data/predictions/predictions.jsonl`.

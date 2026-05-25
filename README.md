@@ -145,15 +145,22 @@ docker run -p 8501:8501 `
   willianalbertorein/trabajofinalproyecto3:latest streamlit
 ```
 
-## Alertas e informes por correo
+## Alertas e informes por correo (Gmail SMTP)
 
-Configure en `.env`:
+1. En Google Account: activar **verificación en 2 pasos** → **Contraseñas de aplicaciones** → crear una para SugarCane.
+2. Añada en `.env`:
 
 ```env
-SENDGRID_API_KEY=SG.xxxx
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=bebesowi@gmail.com
+SMTP_APP_PASSWORD=xxxx xxxx xxxx xxxx
 ALERT_EMAIL=bebesowi@gmail.com
+ALERT_FROM=bebesowi@gmail.com
 ALERT_CONFIDENCE_MIN=0.5
 ```
+
+3. Reinicie la app: `docker compose down && docker compose up app`
 
 - **Alerta inmediata**: al clasificar una hoja con enfermedad (clase ≠ Healthy) y confianza ≥ umbral.
 - **Registro local**: `data/predictions/predictions.jsonl` (BigQuery cuando configure `GCP_PROJECT_ID`).

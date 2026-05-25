@@ -1,12 +1,18 @@
 from __future__ import annotations
 
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from typing import Any, Dict, Optional
 
 from app.config.settings import (
     ALERT_CONFIDENCE_MIN,
     ALERT_EMAIL,
     ALERT_FROM,
-    SENDGRID_API_KEY,
+    SMTP_APP_PASSWORD,
+    SMTP_HOST,
+    SMTP_PORT,
+    SMTP_USER,
 )
 from app.services.report_builder import build_daily_report_html, build_daily_report_text
 
@@ -18,26 +24,25 @@ def is_disease(pred: Dict[str, Any]) -> bool:
 
 
 def alerts_configured() -> bool:
-    return bool(SENDGRID_API_KEY and ALERT_EMAIL)
+    return bool(SMTP_USER and SMTP_APP_PASSWORD and ALERT_EMAIL)
 
 
 def _send_email(subject: str, html_body: str, text_body: str) -> bool:
     if not alerts_configured():
         return False
     try:
-        from sendgrid import SendGridAPIClient
-        from sendgrid.helpers.mail import Mail
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = subject
+        msg["From"] = ALERT_FROM or SMTP_USER
+        msg["To"] = ALERT_EMAIL
+        msg.attach(MIMEText(text_body, "plain", "utf-8"))
+        msg.attach(MIMEText(html_body, "html", "utf-8"))
 
-        message = Mail(
-            from_email=ALERT_FROM,
-            to_emails=ALERT_EMAIL,
-            subject=subject,
-            plain_text_content=text_body,
-            html_content=html_body,
-        )
-        client = SendGridAPIClient(SENDGRID_API_KEY)
-        response = client.send(message)
-        return 200 <= response.status_code < 300
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30) as server:
+            server.starttls()
+            server.login(SMTP_USER, SMTP_APP_PASSWORD)
+            server.sendmail(ALERT_FROM or SMTP_USER, [ALERT_EMAIL], msg.as_string())
+        return True
     except Exception:
         return False
 

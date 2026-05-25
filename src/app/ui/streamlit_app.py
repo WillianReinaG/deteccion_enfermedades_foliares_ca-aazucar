@@ -51,9 +51,9 @@ with st.sidebar:
     st.divider()
     st.header("Alertas por correo")
     if alerts_configured():
-        st.success("SendGrid configurado — alertas activas")
+        st.success("Correo SMTP configurado — alertas activas")
     else:
-        st.warning("Configure SENDGRID_API_KEY y ALERT_EMAIL en .env para alertas.")
+        st.warning("Configure SMTP_USER, SMTP_APP_PASSWORD y ALERT_EMAIL en .env para alertas.")
 
     st.divider()
     st.header("Memoria conversacional")
