@@ -1,2 +1,3 @@
 ruff>=0.4.0
 pytest>=8.0.0
+# Opcional para evaluación completa con LLM juez: pip install ragas datasets

@@ -45,8 +45,11 @@ jobs:
           pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
           pip install -r requirements.txt -r requirements-dev.txt
 
-      - name: Pytest
-        run: pytest -q
+      - name: Pytest (unitarios)
+        run: pytest -q -m "not rag_eval"
+
+      - name: Evaluación RAG (faithfulness, context precision, hallucination rate)
+        run: pytest -q -m rag_eval
 
   docker-build-and-test:
     runs-on: ubuntu-latest

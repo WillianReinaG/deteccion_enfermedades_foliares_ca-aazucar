@@ -1,0 +1,12 @@
+SugarCane — Evaluación RAG conversacional
+Fecha UTC: 2026-06-09T21:11:15.393592+00:00
+
+=== Métricas proxy (CI / léxicas) ===
+faithfulness_avg:       0.5464
+answer_relevance_avg:   0.7575
+context_precision_avg:  0.8571
+hallucination_rate_avg: 0.4536
+
+RAGAS oficial: no ejecutado (requiere ragas + OPENAI_API_KEY).
+
+Todos los umbrales mínimos fueron cumplidos.

@@ -1,0 +1,15 @@
+case_id,question,in_domain,faithfulness,answer_relevance,context_precision,hallucination_rate,sources
+roya_sintomas,¿Cuáles son los síntomas de la roya en caña de azúcar?,True,0.6330,0.8571,0.4000,0.3670,roya_rust_cana.md; roya_rust_cana.md; roya_rust_cana.md; roya_rust_cana.md; roya_rust_cana.md
+mosaico_manejo,¿Cómo se maneja el mosaico en caña de azúcar?,True,0.5747,0.6000,1.0000,0.4253,mosaico_cana.md; mosaico_cana.md; ENFERMEDADESOCASIONADASPORVIRUSENCAADEAZCARENELOCCIDENTEDEMXICO.pdf; mosaico_cana.md; mosaico_cana.md
+redrot_sintomas,¿Qué es la podredumbre roja y cómo afecta la caña?,True,0.6036,0.6667,0.8000,0.3964,podredumbre_roja_redrot_cana.md; podredumbre_roja_redrot_cana.md; podredumbre_roja_redrot_cana.md; podredumbre_roja_redrot_cana.md; podredumbre_roja_redrot_cana.md
+yellow_sintomas,¿Cuáles son los síntomas del amarillamiento en hojas de caña?,True,0.5463,0.7143,1.0000,0.4537,amarillamiento_yellow_cana.md; amarillamiento_yellow_cana.md; amarillamiento_yellow_cana.md; amarillamiento_yellow_cana.md; gm_enfermedades_2016_Cartilla_didactica_No2.pdf
+healthy_monitoreo,¿Qué prácticas se recomiendan para mantener hojas sanas en caña?,True,0.4741,0.8571,0.8000,0.5259,hoja_sana_healthy_cana.md; hoja_sana_healthy_cana.md; hoja_sana_healthy_cana.md; ENFERMEDADESOCASIONADASPORVIRUSENCAADEAZCARENELOCCIDENTEDEMXICO.pdf; enfermedades_cana_azucar.md
+manejo_integrado,¿Qué es el manejo integrado de enfermedades foliares en caña de azúcar?,True,0.4412,0.8571,1.0000,0.5588,manejo_integrado_enfermedades_cana.md; MANEJO_1.PDF; 2._GUIA_PARA_EL_MANEJO_FITOSANITARIO_DE_LA_CA_A_DE_AZ_CAR.pdf; EscalasEvaluacinEnfermedades.pdf; Dialnet-ManejoDeLaNutricionVariedadesYEnfermedadesFungicas-10138094.pdf
+bacterial_blight,¿Cuáles son los síntomas del tizón bacteriano en caña de azúcar?,True,0.5521,0.7500,1.0000,0.4479,81212_67186.pdf; MANUAL ENFERMEDAD DE CANA.pdf; EscalasEvaluacinEnfermedades.pdf; 81212_67186.pdf; 21052_417.pdf
+fuera_dominio,¿Quién ganó el último mundial de fútbol?,False,0.2353,0.0000,1.0000,0.7647,ENFERMEDADESOCASIONADASPORVIRUSENCAADEAZCARENELOCCIDENTEDEMXICO.pdf; st_30.pdf; XENbhxqtitZJdyOSemnDYflFhmVmbhuq.pdf; MonografiaMIPencaa.pdf; 81212_67186.pdf
+
+PROMEDIO (casos en dominio),,
+faithfulness_avg,0.5464
+answer_relevance_avg,0.7575
+context_precision_avg,0.8571
+hallucination_rate_avg,0.4536

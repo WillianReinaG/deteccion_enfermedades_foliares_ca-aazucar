@@ -1,0 +1,100 @@
+{
+  "thresholds": {
+    "faithfulness_min": 0.20,
+    "answer_relevance_min": 0.10,
+    "context_precision_min": 0.35,
+    "hallucination_rate_max": 0.80
+  },
+  "cases": [
+    {
+      "id": "roya_sintomas",
+      "question": "¿Cuáles son los síntomas de la roya en caña de azúcar?",
+      "expected_keywords": ["roya", "rust", "lesion", "hoja", "mancha", "pustula"],
+      "in_domain": true,
+      "prediction": {
+        "class_name": "Rust",
+        "confidence": 0.88,
+        "model_id": "resnet50",
+        "framework": "torch",
+        "top_predictions": []
+      }
+    },
+    {
+      "id": "mosaico_manejo",
+      "question": "¿Cómo se maneja el mosaico en caña de azúcar?",
+      "expected_keywords": ["mosaico", "virus", "semilla", "material", "sano"],
+      "in_domain": true,
+      "prediction": {
+        "class_name": "Mosaic",
+        "confidence": 0.82,
+        "model_id": "resnet50",
+        "framework": "torch",
+        "top_predictions": []
+      }
+    },
+    {
+      "id": "redrot_sintomas",
+      "question": "¿Qué es la podredumbre roja y cómo afecta la caña?",
+      "expected_keywords": ["podredumbre", "roja", "redrot", "tallo", "colletotrichum"],
+      "in_domain": true,
+      "prediction": {
+        "class_name": "RedRot",
+        "confidence": 0.79,
+        "model_id": "resnet50",
+        "framework": "torch",
+        "top_predictions": []
+      }
+    },
+    {
+      "id": "yellow_sintomas",
+      "question": "¿Cuáles son los síntomas del amarillamiento en hojas de caña?",
+      "expected_keywords": ["amarillamiento", "yellow", "hoja", "amarilla", "nervadura"],
+      "in_domain": true,
+      "prediction": {
+        "class_name": "Yellow",
+        "confidence": 0.76,
+        "model_id": "resnet50",
+        "framework": "torch",
+        "top_predictions": []
+      }
+    },
+    {
+      "id": "healthy_monitoreo",
+      "question": "¿Qué prácticas se recomiendan para mantener hojas sanas en caña?",
+      "expected_keywords": ["sana", "healthy", "monitoreo", "preventivo", "cultivo"],
+      "in_domain": true,
+      "prediction": {
+        "class_name": "Healthy",
+        "confidence": 0.91,
+        "model_id": "resnet50",
+        "framework": "torch",
+        "top_predictions": []
+      }
+    },
+    {
+      "id": "manejo_integrado",
+      "question": "¿Qué es el manejo integrado de enfermedades foliares en caña de azúcar?",
+      "expected_keywords": ["manejo", "integrado", "enfermedad", "foliar", "diagnostico"],
+      "in_domain": true
+    },
+    {
+      "id": "bacterial_blight",
+      "question": "¿Cuáles son los síntomas del tizón bacteriano en caña de azúcar?",
+      "expected_keywords": ["bacterial", "blight", "tizon", "bacteriano", "xanthomonas"],
+      "in_domain": true,
+      "prediction": {
+        "class_name": "Bacterial Blight",
+        "confidence": 0.74,
+        "model_id": "resnet50",
+        "framework": "torch",
+        "top_predictions": []
+      }
+    },
+    {
+      "id": "fuera_dominio",
+      "question": "¿Quién ganó el último mundial de fútbol?",
+      "expected_keywords": [],
+      "in_domain": false
+    }
+  ]
+}
