@@ -19,6 +19,7 @@ RUN pip install --upgrade pip && \
     pip install -r requirements.txt && \
     pip install -r requirements-dev.txt
 
+COPY pyproject.toml ./
 COPY src ./src
 COPY tests ./tests
 COPY data ./data

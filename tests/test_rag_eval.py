@@ -3,8 +3,6 @@ from pathlib import Path
 
 import pytest
 
-pytestmark = pytest.mark.rag_eval
-
 from app.agent.agent import SugarCaneAgent
 from app.rag.eval_metrics import (
     answer_relevance,
@@ -14,6 +12,8 @@ from app.rag.eval_metrics import (
     faithfulness,
     hallucination_rate,
 )
+
+pytestmark = pytest.mark.rag_eval
 
 DATASET_PATH = Path(__file__).resolve().parents[1] / "data" / "eval" / "rag_eval_dataset.json"
 
