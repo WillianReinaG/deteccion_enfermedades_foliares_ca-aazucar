@@ -9,6 +9,8 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
+import numpy as np
+
 SPANISH_STOP = frozenset(
     "a al algo algunas algunos ante antes como con contra cual cuales cuando de del desde donde dos el ella ellas ellos en entre era eran es esa esas ese eso esos esta estaba estaban estamos estan estas este esto estos fue fueron ha habia habian han hasta hay la las le mas me mi mis mucho muy nos o para pero por porque que quien se sin sobre su sus tambien te tiene todo tu tus un una uno usted ustedes y ya".split()
 )
@@ -80,15 +82,40 @@ class RagEvalCaseResult:
 
 
 @dataclass
+class BootstrapMetricStats:
+    metric: str
+    mean: float
+    std: float
+    ci_lower: float
+    ci_upper: float
+    n_samples: int
+    n_bootstrap: int
+    ci_level: float
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "metric": self.metric,
+            "mean": self.mean,
+            "std": self.std,
+            "ci_lower": self.ci_lower,
+            "ci_upper": self.ci_upper,
+            "n_samples": self.n_samples,
+            "n_bootstrap": self.n_bootstrap,
+            "ci_level": self.ci_level,
+        }
+
+
+@dataclass
 class RagEvalSummary:
     results: List[RagEvalCaseResult]
     faithfulness_avg: float
     answer_relevance_avg: float
     context_precision_avg: float
     hallucination_rate_avg: float
+    bootstrap: List[BootstrapMetricStats] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        payload = {
             "faithfulness_avg": self.faithfulness_avg,
             "answer_relevance_avg": self.answer_relevance_avg,
             "context_precision_avg": self.context_precision_avg,
@@ -105,6 +132,63 @@ class RagEvalSummary:
                 for r in self.results
             ],
         }
+        if self.bootstrap:
+            payload["bootstrap"] = [b.to_dict() for b in self.bootstrap]
+        return payload
+
+
+def compute_bootstrap_stats(
+    metric: str,
+    values: List[float],
+    n_bootstrap: int = 5000,
+    ci_level: float = 0.95,
+    seed: int = 42,
+) -> BootstrapMetricStats:
+    arr = np.asarray(values, dtype=float)
+    if arr.size == 0:
+        return BootstrapMetricStats(metric, 0.0, 0.0, 0.0, 0.0, 0, n_bootstrap, ci_level)
+    if arr.size == 1:
+        v = float(arr[0])
+        return BootstrapMetricStats(metric, v, 0.0, v, v, 1, n_bootstrap, ci_level)
+
+    rng = np.random.default_rng(seed)
+    boot_means = np.empty(n_bootstrap, dtype=float)
+    for i in range(n_bootstrap):
+        sample = rng.choice(arr, size=arr.size, replace=True)
+        boot_means[i] = sample.mean()
+
+    alpha = (1.0 - ci_level) / 2.0
+    ci_lower, ci_upper = np.percentile(boot_means, [100 * alpha, 100 * (1 - alpha)])
+    return BootstrapMetricStats(
+        metric=metric,
+        mean=float(arr.mean()),
+        std=float(arr.std(ddof=1)),
+        ci_lower=float(ci_lower),
+        ci_upper=float(ci_upper),
+        n_samples=int(arr.size),
+        n_bootstrap=n_bootstrap,
+        ci_level=ci_level,
+    )
+
+
+def bootstrap_summary(
+    summary: RagEvalSummary,
+    n_bootstrap: int = 5000,
+    ci_level: float = 0.95,
+    seed: int = 42,
+) -> List[BootstrapMetricStats]:
+    in_domain = [r for r in summary.results if r.in_domain]
+    pool = in_domain or summary.results
+    metrics = {
+        "faithfulness": [r.faithfulness for r in pool],
+        "answer_relevance": [r.answer_relevance for r in pool],
+        "context_precision": [r.context_precision for r in pool],
+        "hallucination_rate": [r.hallucination_rate for r in pool],
+    }
+    return [
+        compute_bootstrap_stats(name, values, n_bootstrap=n_bootstrap, ci_level=ci_level, seed=seed + i)
+        for i, (name, values) in enumerate(metrics.items())
+    ]
 
 
 def evaluate_case(
@@ -153,13 +237,15 @@ def evaluate_agent_cases(agent: Any, cases: List[Dict[str, Any]]) -> RagEvalSumm
     in_domain = [r for r in results if r.in_domain]
     pool = in_domain or results
     n = len(pool)
-    return RagEvalSummary(
+    rag_summary = RagEvalSummary(
         results=results,
         faithfulness_avg=sum(r.faithfulness for r in pool) / n,
         answer_relevance_avg=sum(r.answer_relevance for r in pool) / n,
         context_precision_avg=sum(r.context_precision for r in pool) / n,
         hallucination_rate_avg=sum(r.hallucination_rate for r in pool) / n,
     )
+    rag_summary.bootstrap = bootstrap_summary(rag_summary)
+    return rag_summary
 
 
 def check_thresholds(summary: RagEvalSummary, thresholds: Dict[str, float]) -> List[str]:

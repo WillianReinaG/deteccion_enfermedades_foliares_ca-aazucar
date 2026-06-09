@@ -6,11 +6,15 @@ import pytest
 from app.agent.agent import SugarCaneAgent
 from app.rag.eval_metrics import (
     answer_relevance,
+    bootstrap_summary,
     check_thresholds,
+    compute_bootstrap_stats,
     context_precision,
     evaluate_agent_cases,
     faithfulness,
     hallucination_rate,
+    RagEvalCaseResult,
+    RagEvalSummary,
 )
 
 pytestmark = pytest.mark.rag_eval
@@ -25,6 +29,50 @@ def _load_dataset() -> dict:
 @pytest.fixture(scope="module")
 def agent():
     return SugarCaneAgent()
+
+
+def test_bootstrap_stats_computes_ci():
+    values = [0.4, 0.5, 0.6, 0.55, 0.45, 0.52, 0.58]
+    stat = compute_bootstrap_stats("faithfulness", values, n_bootstrap=2000, seed=7)
+    assert stat.mean == sum(values) / len(values)
+    assert stat.std > 0
+    assert stat.ci_lower <= stat.mean <= stat.ci_upper
+    assert stat.n_samples == 7
+    assert stat.n_bootstrap == 2000
+
+    dummy = RagEvalSummary(
+        results=[
+            RagEvalCaseResult(
+                case_id="a",
+                question="q",
+                answer="a",
+                contexts=[],
+                faithfulness=0.6,
+                answer_relevance=0.7,
+                context_precision=0.8,
+                hallucination_rate=0.4,
+                in_domain=True,
+            ),
+            RagEvalCaseResult(
+                case_id="b",
+                question="q2",
+                answer="b",
+                contexts=[],
+                faithfulness=0.5,
+                answer_relevance=0.6,
+                context_precision=0.9,
+                hallucination_rate=0.5,
+                in_domain=True,
+            ),
+        ],
+        faithfulness_avg=0.55,
+        answer_relevance_avg=0.65,
+        context_precision_avg=0.85,
+        hallucination_rate_avg=0.45,
+    )
+    boot = bootstrap_summary(dummy, n_bootstrap=1000, seed=1)
+    assert len(boot) == 4
+    assert all(b.ci_lower <= b.mean <= b.ci_upper for b in boot)
 
 
 def test_rag_metric_functions_basic():

@@ -1,74 +1,116 @@
 {
-  "generated_at_utc": "2026-06-09T21:11:15.381709+00:00",
+  "generated_at_utc": "2026-06-09T23:38:20.841384+00:00",
   "proxy_metrics": {
-    "faithfulness_avg": 0.546433971638556,
-    "answer_relevance_avg": 0.7574829931972789,
+    "faithfulness_avg": 0.5328719950876095,
+    "answer_relevance_avg": 0.7778911564625849,
     "context_precision_avg": 0.8571428571428571,
-    "hallucination_rate_avg": 0.45356602836144394,
+    "hallucination_rate_avg": 0.4671280049123904,
     "cases": [
       {
         "id": "roya_sintomas",
-        "faithfulness": 0.6330275229357798,
+        "faithfulness": 0.631578947368421,
         "answer_relevance": 0.8571428571428571,
         "context_precision": 0.4,
-        "hallucination_rate": 0.3669724770642202,
+        "hallucination_rate": 0.368421052631579,
         "in_domain": true
       },
       {
         "id": "mosaico_manejo",
-        "faithfulness": 0.5747126436781609,
+        "faithfulness": 0.5862068965517241,
         "answer_relevance": 0.6,
         "context_precision": 1.0,
-        "hallucination_rate": 0.4252873563218391,
+        "hallucination_rate": 0.4137931034482759,
         "in_domain": true
       },
       {
         "id": "redrot_sintomas",
-        "faithfulness": 0.6036036036036037,
+        "faithfulness": 0.5740740740740741,
         "answer_relevance": 0.6666666666666666,
         "context_precision": 0.8,
-        "hallucination_rate": 0.39639639639639634,
+        "hallucination_rate": 0.42592592592592593,
         "in_domain": true
       },
       {
         "id": "yellow_sintomas",
-        "faithfulness": 0.5462962962962963,
-        "answer_relevance": 0.7142857142857143,
+        "faithfulness": 0.5714285714285714,
+        "answer_relevance": 0.8571428571428571,
         "context_precision": 1.0,
-        "hallucination_rate": 0.4537037037037037,
+        "hallucination_rate": 0.4285714285714286,
         "in_domain": true
       },
       {
         "id": "healthy_monitoreo",
-        "faithfulness": 0.47413793103448276,
+        "faithfulness": 0.453125,
         "answer_relevance": 0.8571428571428571,
         "context_precision": 0.8,
-        "hallucination_rate": 0.5258620689655172,
+        "hallucination_rate": 0.546875,
         "in_domain": true
       },
       {
         "id": "manejo_integrado",
-        "faithfulness": 0.4411764705882353,
+        "faithfulness": 0.47619047619047616,
         "answer_relevance": 0.8571428571428571,
         "context_precision": 1.0,
-        "hallucination_rate": 0.5588235294117647,
+        "hallucination_rate": 0.5238095238095238,
         "in_domain": true
       },
       {
         "id": "bacterial_blight",
-        "faithfulness": 0.5520833333333334,
+        "faithfulness": 0.4375,
         "answer_relevance": 0.75,
         "context_precision": 1.0,
-        "hallucination_rate": 0.44791666666666663,
+        "hallucination_rate": 0.5625,
         "in_domain": true
       },
       {
         "id": "fuera_dominio",
-        "faithfulness": 0.23529411764705882,
+        "faithfulness": 0.17391304347826086,
         "answer_relevance": 0.0,
         "context_precision": 1.0,
-        "hallucination_rate": 0.7647058823529411,
+        "hallucination_rate": 0.8260869565217391,
         "in_domain": false
+      }
+    ],
+    "bootstrap": [
+      {
+        "metric": "faithfulness",
+        "mean": 0.5328719950876095,
+        "std": 0.07576288701345008,
+        "ci_lower": 0.4808499755392175,
+        "ci_upper": 0.5845291723767546,
+        "n_samples": 7,
+        "n_bootstrap": 5000,
+        "ci_level": 0.95
+      },
+      {
+        "metric": "answer_relevance",
+        "mean": 0.7778911564625851,
+        "std": 0.10794859542828739,
+        "ci_lower": 0.7020408163265305,
+        "ci_upper": 0.8418367346938774,
+        "n_samples": 7,
+        "n_bootstrap": 5000,
+        "ci_level": 0.95
+      },
+      {
+        "metric": "context_precision",
+        "mean": 0.8571428571428571,
+        "std": 0.22253945610567472,
+        "ci_lower": 0.6857142857142858,
+        "ci_upper": 0.9714285714285714,
+        "n_samples": 7,
+        "n_bootstrap": 5000,
+        "ci_level": 0.95
+      },
+      {
+        "metric": "hallucination_rate",
+        "mean": 0.4671280049123904,
+        "std": 0.07576288701345008,
+        "ci_lower": 0.41710433773353056,
+        "ci_upper": 0.5195134327677431,
+        "n_samples": 7,
+        "n_bootstrap": 5000,
+        "ci_level": 0.95
       }
     ]
   },

@@ -19,12 +19,13 @@ from datetime import datetime, timezone
 
 from app.agent.agent import SugarCaneAgent
 from app.config.settings import OPENAI_API_KEY
-from app.rag.eval_metrics import check_thresholds, evaluate_agent_cases
+from app.rag.eval_metrics import bootstrap_summary, check_thresholds, evaluate_agent_cases
 
 BASE_DIR = SRC_DIR.parent
 DEFAULT_DATASET = BASE_DIR / "data" / "eval" / "rag_eval_dataset.json"
 DEFAULT_OUTPUT = BASE_DIR / "data" / "eval" / "rag_eval_results.json"
 DEFAULT_CSV = BASE_DIR / "data" / "eval" / "rag_eval_results.csv"
+DEFAULT_BOOTSTRAP_CSV = BASE_DIR / "data" / "eval" / "rag_eval_bootstrap.csv"
 DEFAULT_SUMMARY = BASE_DIR / "data" / "eval" / "rag_eval_summary.txt"
 
 
@@ -116,6 +117,38 @@ def _save_csv(path: Path, summary) -> None:
         writer.writerow(["hallucination_rate_avg", f"{summary.hallucination_rate_avg:.4f}"])
 
 
+def _save_bootstrap_csv(path: Path, summary) -> None:
+    import csv
+
+    with path.open("w", encoding="utf-8", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(
+            [
+                "metric",
+                "mean",
+                "std",
+                "ci_lower_95",
+                "ci_upper_95",
+                "n_samples",
+                "n_bootstrap",
+                "ci_level",
+            ]
+        )
+        for stat in summary.bootstrap:
+            writer.writerow(
+                [
+                    stat.metric,
+                    f"{stat.mean:.4f}",
+                    f"{stat.std:.4f}",
+                    f"{stat.ci_lower:.4f}",
+                    f"{stat.ci_upper:.4f}",
+                    stat.n_samples,
+                    stat.n_bootstrap,
+                    stat.ci_level,
+                ]
+            )
+
+
 def _save_summary_txt(path: Path, summary, ragas_metrics: dict | None, failures: list[str]) -> None:
     lines = [
         "SugarCane — Evaluación RAG conversacional",
@@ -128,6 +161,15 @@ def _save_summary_txt(path: Path, summary, ragas_metrics: dict | None, failures:
         f"hallucination_rate_avg: {summary.hallucination_rate_avg:.4f}",
         "",
     ]
+    if summary.bootstrap:
+        lines.append("=== Bootstrap (IC 95%, casos en dominio) ===")
+        lines.append(f"{'Métrica':<22} {'Media':>8} {'DE':>8} {'IC inf':>8} {'IC sup':>8} {'n':>4}")
+        for stat in summary.bootstrap:
+            lines.append(
+                f"{stat.metric:<22} {stat.mean:>8.4f} {stat.std:>8.4f} "
+                f"{stat.ci_lower:>8.4f} {stat.ci_upper:>8.4f} {stat.n_samples:>4}"
+            )
+        lines.append("")
     if ragas_metrics:
         lines.append("=== RAGAS (LLM juez — Es et al., 2024) ===")
         for key, value in ragas_metrics.items():
@@ -150,12 +192,15 @@ def main() -> int:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--csv", type=Path, default=DEFAULT_CSV)
     parser.add_argument("--summary", type=Path, default=DEFAULT_SUMMARY)
+    parser.add_argument("--bootstrap-csv", type=Path, default=DEFAULT_BOOTSTRAP_CSV)
+    parser.add_argument("--n-bootstrap", type=int, default=5000, help="Réplicas bootstrap")
     parser.add_argument("--skip-ragas", action="store_true", help="Omitir RAGAS oficial (solo métricas proxy)")
     args = parser.parse_args()
 
     dataset = json.loads(args.dataset.read_text(encoding="utf-8"))
     agent = SugarCaneAgent()
     summary = evaluate_agent_cases(agent, dataset["cases"])
+    summary.bootstrap = bootstrap_summary(summary, n_bootstrap=args.n_bootstrap)
     failures = check_thresholds(summary, dataset["thresholds"])
 
     payload = {
@@ -168,6 +213,7 @@ def main() -> int:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     _save_csv(args.csv, summary)
+    _save_bootstrap_csv(args.bootstrap_csv, summary)
     _save_summary_txt(args.summary, summary, None, failures)
 
     ragas_metrics = None if args.skip_ragas else _try_ragas_eval(agent, dataset["cases"])
@@ -180,9 +226,17 @@ def main() -> int:
     print(f"answer_relevance_avg:   {summary.answer_relevance_avg:.3f}")
     print(f"context_precision_avg:  {summary.context_precision_avg:.3f}")
     print(f"hallucination_rate_avg: {summary.hallucination_rate_avg:.3f}")
-    print(f"JSON:    {args.output}")
-    print(f"CSV:     {args.csv}")
-    print(f"Resumen: {args.summary}")
+    if summary.bootstrap:
+        print("\n=== Bootstrap (IC 95%) ===")
+        for stat in summary.bootstrap:
+            print(
+                f"{stat.metric}: media={stat.mean:.4f}, DE={stat.std:.4f}, "
+                f"IC=[{stat.ci_lower:.4f}, {stat.ci_upper:.4f}], n={stat.n_samples}"
+            )
+    print(f"\nJSON:      {args.output}")
+    print(f"CSV:       {args.csv}")
+    print(f"Bootstrap: {args.bootstrap_csv}")
+    print(f"Resumen:   {args.summary}")
 
     if ragas_metrics:
         print("\n=== RAGAS (LLM juez) ===")
