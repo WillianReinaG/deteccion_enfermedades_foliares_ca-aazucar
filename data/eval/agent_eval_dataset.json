@@ -1,0 +1,214 @@
+{
+  "thresholds": {
+    "faithfulness_min": 0.2,
+    "answer_relevance_min": 0.1,
+    "hallucination_rate_max": 0.8,
+    "conversation_success_rate_min": 0.7,
+    "context_retention_min": 0.6,
+    "out_of_domain_rejection_min": 0.8,
+    "diagnostic_consistency_min": 0.7
+  },
+  "conversations": [
+    {
+      "id": "redrot_multiturno_manejo",
+      "description": "Conversación multi-turno sobre enfermedad detectada como RedRot.",
+      "prediction": {
+        "class_name": "RedRot",
+        "confidence": 0.9465,
+        "model_id": "regnet_y_3_2gf",
+        "framework": "torch"
+      },
+      "turns": [
+        {
+          "turn_id": "t1",
+          "question": "Explícame la enfermedad detectada, sus síntomas, manejo y prevención.",
+          "expected_keywords": [
+            "redrot",
+            "podredumbre",
+            "roja",
+            "síntomas",
+            "manejo",
+            "prevención",
+            "tallo"
+          ],
+          "in_domain": true,
+          "requires_context_retention": false,
+          "expected_prediction_reference": true
+        },
+        {
+          "turn_id": "t2",
+          "question": "¿Cómo puedo prevenir que se siga propagando?",
+          "expected_keywords": [
+            "prevenir",
+            "propagando",
+            "manejo",
+            "material",
+            "sano",
+            "drenaje",
+            "focos"
+          ],
+          "context_terms": [
+            "redrot",
+            "podredumbre",
+            "roja"
+          ],
+          "in_domain": true,
+          "requires_context_retention": true,
+          "expected_prediction_reference": true
+        }
+      ]
+    },
+    {
+      "id": "rust_multiturno_sintomas_control",
+      "description": "Conversación multi-turno sobre roya detectada.",
+      "prediction": {
+        "class_name": "Rust",
+        "confidence": 0.885,
+        "model_id": "regnet_y_3_2gf",
+        "framework": "torch"
+      },
+      "turns": [
+        {
+          "turn_id": "t1",
+          "question": "¿Cuáles son los síntomas de la enfermedad detectada?",
+          "expected_keywords": [
+            "roya",
+            "rust",
+            "síntoma",
+            "lesión",
+            "hoja",
+            "pústula",
+            "mancha"
+          ],
+          "in_domain": true,
+          "requires_context_retention": false,
+          "expected_prediction_reference": true
+        },
+        {
+          "turn_id": "t2",
+          "question": "¿Qué manejo se recomienda?",
+          "expected_keywords": [
+            "manejo",
+            "control",
+            "monitoreo",
+            "variedad",
+            "campo",
+            "roya"
+          ],
+          "context_terms": [
+            "roya",
+            "rust"
+          ],
+          "in_domain": true,
+          "requires_context_retention": true,
+          "expected_prediction_reference": true
+        }
+      ]
+    },
+    {
+      "id": "yellow_independiente_diagnostico",
+      "description": "Consulta independiente sobre Yellow aunque la predicción sea otra.",
+      "prediction": {
+        "class_name": "RedRot",
+        "confidence": 0.9,
+        "model_id": "regnet_y_3_2gf",
+        "framework": "torch"
+      },
+      "turns": [
+        {
+          "turn_id": "t1",
+          "question": "Me puedes dar información de la enfermedad yellow en caña de azúcar independientemente del diagnóstico anterior.",
+          "expected_keywords": [
+            "yellow",
+            "amarillamiento",
+            "hoja",
+            "amarilla",
+            "nervadura",
+            "caña"
+          ],
+          "context_terms": [
+            "yellow",
+            "amarillamiento"
+          ],
+          "in_domain": true,
+          "requires_context_retention": false,
+          "expected_prediction_reference": false
+        }
+      ]
+    },
+    {
+      "id": "mosaic_manejo",
+      "description": "Consulta sobre manejo de mosaico.",
+      "prediction": {
+        "class_name": "Mosaic",
+        "confidence": 0.82,
+        "model_id": "regnet_y_3_2gf",
+        "framework": "torch"
+      },
+      "turns": [
+        {
+          "turn_id": "t1",
+          "question": "¿Cómo se maneja el mosaico en caña de azúcar?",
+          "expected_keywords": [
+            "mosaico",
+            "virus",
+            "material",
+            "sano",
+            "semilla",
+            "manejo"
+          ],
+          "in_domain": true,
+          "requires_context_retention": false,
+          "expected_prediction_reference": true
+        }
+      ]
+    },
+    {
+      "id": "healthy_monitoreo",
+      "description": "Consulta sobre monitoreo preventivo cuando la hoja es sana.",
+      "prediction": {
+        "class_name": "Healthy",
+        "confidence": 0.95,
+        "model_id": "regnet_y_3_2gf",
+        "framework": "torch"
+      },
+      "turns": [
+        {
+          "turn_id": "t1",
+          "question": "¿Qué prácticas recomiendas si la hoja fue clasificada como sana?",
+          "expected_keywords": [
+            "sana",
+            "healthy",
+            "monitoreo",
+            "preventivo",
+            "cultivo",
+            "campo"
+          ],
+          "in_domain": true,
+          "requires_context_retention": false,
+          "expected_prediction_reference": true
+        }
+      ]
+    },
+    {
+      "id": "rechazo_fuera_dominio",
+      "description": "Validación de rechazo a preguntas fuera del dominio.",
+      "prediction": {
+        "class_name": "RedRot",
+        "confidence": 0.9384,
+        "model_id": "regnet_y_3_2gf",
+        "framework": "torch"
+      },
+      "turns": [
+        {
+          "turn_id": "t1",
+          "question": "¿Cuál es el carro más vendido en Colombia?",
+          "expected_keywords": [],
+          "in_domain": false,
+          "requires_context_retention": false,
+          "expected_prediction_reference": false
+        }
+      ]
+    }
+  ]
+}

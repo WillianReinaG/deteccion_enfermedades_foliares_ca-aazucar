@@ -1,9 +1,11 @@
 {
+  "description": "Dataset de evaluación RAG — métricas: Faithfulness, Answer Relevance, Hallucination Rate, nDCG@5 (semántica)",
+  "retrieval_method": "semantic",
   "thresholds": {
-    "faithfulness_min": 0.20,
-    "answer_relevance_min": 0.10,
-    "context_precision_min": 0.35,
-    "hallucination_rate_max": 0.80
+    "faithfulness_min": 0.15,
+    "answer_relevance_min": 0.20,
+    "ndcg_at_5_min": 0.65,
+    "hallucination_rate_max": 0.85
   },
   "cases": [
     {

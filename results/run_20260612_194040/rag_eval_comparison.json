@@ -1,0 +1,120 @@
+{
+  "metrics": [
+    "faithfulness",
+    "answer_relevance",
+    "hallucination_rate",
+    "ndcg_at_5"
+  ],
+  "ndcg_mode": "semantic_embedding_cosine",
+  "detail": [
+    {
+      "query_id": "roya_sintomas",
+      "question": "¿Cuáles son los síntomas de la roya en caña de azúcar?",
+      "method": "semantic",
+      "faithfulness": 0.8161072426750546,
+      "answer_relevance": 0.8126224805911382,
+      "ndcg_at_5": 0.9949175860078835,
+      "hallucination_rate": 0.18389275732494537,
+      "top_sources": [
+        "roya_rust_cana.md",
+        "MANUAL ENFERMEDAD DE CANA.pdf",
+        "Guia-Tecnica-del-Canero-PROICSA.pdf"
+      ]
+    },
+    {
+      "query_id": "mosaico_manejo",
+      "question": "¿Cómo se maneja el mosaico en caña de azúcar?",
+      "method": "semantic",
+      "faithfulness": 0.722305566264737,
+      "answer_relevance": 0.7786556994915008,
+      "ndcg_at_5": 0.9831128455351299,
+      "hallucination_rate": 0.27769443373526304,
+      "top_sources": [
+        "mosaico_cana.md",
+        "MANUAL ENFERMEDAD DE CANA.pdf",
+        "MonografiaMIPencaa.pdf"
+      ]
+    },
+    {
+      "query_id": "redrot_sintomas",
+      "question": "¿Qué es la podredumbre roja y cómo afecta la caña?",
+      "method": "semantic",
+      "faithfulness": 0.8197211494368892,
+      "answer_relevance": 0.7907542159159978,
+      "ndcg_at_5": 0.9891752937529216,
+      "hallucination_rate": 0.18027885056311077,
+      "top_sources": [
+        "podredumbre_roja_redrot_cana.md",
+        "manejo_integrado_enfermedades_cana.md",
+        "AnOverviewofMajorFungalDiseasesofSugarcaneinIndia.pdf"
+      ]
+    },
+    {
+      "query_id": "yellow_sintomas",
+      "question": "¿Cuáles son los síntomas del amarillamiento en hojas de caña?",
+      "method": "semantic",
+      "faithfulness": 0.8573139158215852,
+      "answer_relevance": 0.848609418173631,
+      "ndcg_at_5": 0.9923582192395098,
+      "hallucination_rate": 0.14268608417841477,
+      "top_sources": [
+        "amarillamiento_yellow_cana.md",
+        "ENFERMEDADESOCASIONADASPORVIRUSENCAADEAZCARENELOCCIDENTEDEMXICO.pdf",
+        "edlca.pdf"
+      ]
+    },
+    {
+      "query_id": "healthy_monitoreo",
+      "question": "¿Qué prácticas se recomiendan para mantener hojas sanas en caña?",
+      "method": "semantic",
+      "faithfulness": 0.8107944271913389,
+      "answer_relevance": 0.8313878178596497,
+      "ndcg_at_5": 0.995129891283519,
+      "hallucination_rate": 0.18920557280866113,
+      "top_sources": [
+        "enfermedades_cana_azucar.md",
+        "hoja_sana_healthy_cana.md",
+        "DE00006_EXAMENCOMPLEXIVO.pdf"
+      ]
+    },
+    {
+      "query_id": "manejo_integrado",
+      "question": "¿Qué es el manejo integrado de enfermedades foliares en caña de azúcar?",
+      "method": "semantic",
+      "faithfulness": 0.8050170517662196,
+      "answer_relevance": 0.8631439432501793,
+      "ndcg_at_5": 0.99874102539526,
+      "hallucination_rate": 0.19498294823378037,
+      "top_sources": [
+        "manejo_integrado_enfermedades_cana.md",
+        "Guia-Tecnica-del-Canero-PROICSA.pdf",
+        "edlca.pdf"
+      ]
+    },
+    {
+      "query_id": "bacterial_blight",
+      "question": "¿Cuáles son los síntomas del tizón bacteriano en caña de azúcar?",
+      "method": "semantic",
+      "faithfulness": 0.6846453399885268,
+      "answer_relevance": 0.8151085436344147,
+      "ndcg_at_5": 0.977989985523785,
+      "hallucination_rate": 0.31535466001147316,
+      "top_sources": [
+        "EscalasEvaluacinEnfermedades.pdf",
+        "MANUAL ENFERMEDAD DE CANA.pdf",
+        "ENFERMEDADESOCASIONADASPORVIRUSENCAADEAZCARENELOCCIDENTEDEMXICO.pdf"
+      ]
+    }
+  ],
+  "summary": [
+    {
+      "method": "semantic",
+      "n_queries": 7,
+      "faithfulness_avg": 0.7879863847349073,
+      "answer_relevance_avg": 0.8200403027023587,
+      "ndcg_at_5_avg": 0.9902035495340014,
+      "hallucination_rate_avg": 0.21201361526509266
+    }
+  ],
+  "best_method": "semantic"
+}

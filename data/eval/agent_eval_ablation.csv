@@ -1,0 +1,15 @@
+﻿conversation_id,turn_id,question,faithfulness_with_rag,faithfulness_without_rag,answer_relevance_with_rag,answer_relevance_without_rag,hallucination_rate_with_rag,hallucination_rate_without_rag,delta_faithfulness,delta_answer_relevance,delta_hallucination_rate
+redrot_multiturno_manejo,t1,"Explícame la enfermedad detectada, sus síntomas, manejo y prevención.",0.5517,0.1729,0.6667,0.8333,0.4483,0.8271,0.3788,-0.1667,-0.3788
+redrot_multiturno_manejo,t2,¿Cómo puedo prevenir que se siga propagando?,0.4545,0.2021,0.2000,0.2000,0.5455,0.7979,0.2524,0.0000,-0.2524
+rust_multiturno_sintomas_control,t1,¿Cuáles son los síntomas de la enfermedad detectada?,0.6355,0.2344,0.6000,0.6000,0.3645,0.7656,0.4011,0.0000,-0.4011
+rust_multiturno_sintomas_control,t2,¿Qué manejo se recomienda?,0.6024,0.2179,0.6667,0.6667,0.3976,0.7821,0.3845,0.0000,-0.3845
+yellow_independiente_diagnostico,t1,Me puedes dar información de la enfermedad yellow en caña de azúcar independientemente del diagnóstico anterior.,0.2500,0.1127,0.5000,0.5000,0.7500,0.8873,0.1373,0.0000,-0.1373
+mosaic_manejo,t1,¿Cómo se maneja el mosaico en caña de azúcar?,0.5500,0.2277,0.6000,0.6000,0.4500,0.7723,0.3223,0.0000,-0.3223
+healthy_monitoreo,t1,¿Qué prácticas recomiendas si la hoja fue clasificada como sana?,0.5825,0.2065,0.6667,0.6667,0.4175,0.7935,0.3760,0.0000,-0.3760
+rechazo_fuera_dominio,t1,¿Cuál es el carro más vendido en Colombia?,0.0952,0.0714,0.8000,0.8000,0.9048,0.9286,0.0238,0.0000,-0.0238
+
+PROMEDIO
+metric,without_rag,with_rag,delta
+faithfulness,0.1963,0.5181,0.3218
+answer_relevance,0.5810,0.5571,-0.0238
+hallucination_rate,0.8037,0.4819,-0.3218

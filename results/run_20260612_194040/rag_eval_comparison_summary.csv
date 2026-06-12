@@ -1,0 +1,2 @@
+method,n_queries,faithfulness_avg,answer_relevance_avg,ndcg_at_5_avg,hallucination_rate_avg
+semantic,7,0.7879863847349073,0.8200403027023587,0.9902035495340014,0.21201361526509266

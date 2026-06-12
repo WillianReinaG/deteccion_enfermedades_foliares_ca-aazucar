@@ -1,0 +1,8 @@
+﻿metric,mean,std,ci_lower_95,ci_upper_95,n_samples,n_bootstrap
+faithfulness,0.5181,0.1311,0.4202,0.5917,7,5000
+answer_relevance,0.5571,0.1686,0.4333,0.6476,7,5000
+hallucination_rate,0.4819,0.1311,0.4082,0.5829,7,5000
+conversational_coherence,0.7986,0.0708,0.7489,0.8416,7,5000
+diagnostic_consistency,1.0000,0.0000,1.0000,1.0000,7,5000
+prediction_reference,1.0000,0.0000,1.0000,1.0000,7,5000
+multi_turn_success,1.0000,0.0000,1.0000,1.0000,8,5000

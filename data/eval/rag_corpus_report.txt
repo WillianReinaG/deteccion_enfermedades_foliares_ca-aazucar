@@ -1,0 +1,32 @@
+SugarCane — Reporte técnico de corpus y recuperación RAG
+Fecha UTC: 2026-06-12T19:40:23.261400+00:00
+
+Directorio base documental: C:\SugarCane ProyectoFinal\SugarCane ProyectoFinal\SugarCane ProyectoFinal\src\app\knowledge_base
+Número de documentos: 46
+Número de chunks: 1923
+
+=== Chunking ===
+Estrategia: Markdown headings when available; sliding character window otherwise
+Chunk size: 1400 caracteres
+Overlap: 300 caracteres
+Stride: 1100 caracteres
+
+=== Vectorización / embeddings ===
+Método: semantic
+Modelo embeddings: paraphrase-multilingual-mpnet-base-v2
+Índice: FAISS IndexFlatIP
+Top-K por defecto: 5
+MMR habilitado: True
+Pesos score: {'retrieval_score': 0.55, 'keyword_overlap': 0.25, 'disease_boost_max': 0.55}
+
+=== Distribución de chunks por enfermedad ===
+Bacterial Blight: 23
+Healthy: 96
+Mosaic: 159
+RedRot: 7
+Rust: 201
+Yellow: 111
+general: 1481
+
+=== Estadísticas de longitud de chunks ===
+{'min': 21, 'max': 1400, 'mean': 1274.204888195528, 'median': 1331}

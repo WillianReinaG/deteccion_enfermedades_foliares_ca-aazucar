@@ -28,3 +28,19 @@ BQ_TABLE = os.getenv("BQ_TABLE", "predictions")
 
 CLASS_NAMES_DEFAULT = ["Bacterial Blight","Healthy", "Mosaic", "RedRot", "Rust", "Yellow"]
 IMG_SIZE = 224
+
+# RAG — recuperación documental
+RAG_RETRIEVAL_METHOD = os.getenv("RAG_RETRIEVAL_METHOD", "semantic").strip().lower()
+SEMANTIC_MODEL_NAME = os.getenv(
+    "SEMANTIC_MODEL_NAME", "paraphrase-multilingual-mpnet-base-v2"
+).strip()
+FINETUNED_EMBEDDING_PATH = os.getenv("FINETUNED_EMBEDDING_PATH", "").strip()
+USE_OPENAI_EMBEDDINGS = os.getenv("USE_OPENAI_EMBEDDINGS", "false").strip().lower() in {"1", "true", "yes"}
+OPENAI_EMBEDDING_MODEL = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small").strip()
+CHUNK_SIZE_CHARS = int(os.getenv("CHUNK_SIZE_CHARS", "1400"))
+CHUNK_OVERLAP_CHARS = int(os.getenv("CHUNK_OVERLAP_CHARS", "300"))
+HYBRID_RRF_K = int(os.getenv("HYBRID_RRF_K", "60"))
+HYBRID_SEMANTIC_WEIGHT = float(os.getenv("HYBRID_SEMANTIC_WEIGHT", "0.5"))
+HYBRID_BM25_WEIGHT = float(os.getenv("HYBRID_BM25_WEIGHT", "0.5"))
+RESULTS_DIR = BASE_DIR / os.getenv("RESULTS_DIR", "results")
+EMBEDDINGS_DIR = MODEL_DIR / "embeddings"

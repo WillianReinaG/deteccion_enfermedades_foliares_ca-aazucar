@@ -1,125 +1,620 @@
 {
-  "generated_at_utc": "2026-06-09T23:38:20.841384+00:00",
+  "generated_at_utc": "2026-06-12T19:40:23.261400+00:00",
+  "metrics": [
+    "faithfulness",
+    "answer_relevance",
+    "hallucination_rate",
+    "ndcg_at_5"
+  ],
+  "retrieval_method": "semantic",
   "proxy_metrics": {
-    "faithfulness_avg": 0.5328719950876095,
-    "answer_relevance_avg": 0.7778911564625849,
-    "context_precision_avg": 0.8571428571428571,
-    "hallucination_rate_avg": 0.4671280049123904,
+    "metrics": [
+      "faithfulness",
+      "answer_relevance",
+      "hallucination_rate",
+      "ndcg_at_5"
+    ],
+    "retrieval_method": "semantic",
+    "faithfulness_avg": 0.7626171599137888,
+    "answer_relevance_avg": 0.8322875360080174,
+    "ndcg_at_5_avg": 0.9902035495340014,
+    "hallucination_rate_avg": 0.23738284008621127,
     "cases": [
       {
         "id": "roya_sintomas",
-        "faithfulness": 0.631578947368421,
-        "answer_relevance": 0.8571428571428571,
-        "context_precision": 0.4,
-        "hallucination_rate": 0.368421052631579,
-        "in_domain": true
+        "question": "¿Cuáles son los síntomas de la roya en caña de azúcar?",
+        "faithfulness": 0.8162219295501709,
+        "answer_relevance": 0.8154422556360562,
+        "ndcg_at_5": 0.9949175860078835,
+        "hallucination_rate": 0.18377807044982908,
+        "retrieval_method": "semantic",
+        "in_domain": true,
+        "sources": [
+          "roya_rust_cana.md",
+          "MANUAL ENFERMEDAD DE CANA.pdf",
+          "Guia-Tecnica-del-Canero-PROICSA.pdf",
+          "httpsrepository.agrosavia.coserverapicorebitstream.pdf",
+          "EscalasEvaluacinEnfermedades.pdf"
+        ],
+        "ablation_no_rag": {
+          "faithfulness": 0.7406706065501807,
+          "answer_relevance": 0.8842813010017077,
+          "ndcg_at_5": 0.0,
+          "hallucination_rate": 0.2593293934498193
+        }
       },
       {
         "id": "mosaico_manejo",
-        "faithfulness": 0.5862068965517241,
-        "answer_relevance": 0.6,
-        "context_precision": 1.0,
-        "hallucination_rate": 0.4137931034482759,
-        "in_domain": true
+        "question": "¿Cómo se maneja el mosaico en caña de azúcar?",
+        "faithfulness": 0.7210323687681217,
+        "answer_relevance": 0.7682091093063355,
+        "ndcg_at_5": 0.9831128455351299,
+        "hallucination_rate": 0.2789676312318783,
+        "retrieval_method": "semantic",
+        "in_domain": true,
+        "sources": [
+          "mosaico_cana.md",
+          "MANUAL ENFERMEDAD DE CANA.pdf",
+          "MonografiaMIPencaa.pdf",
+          "ENFERMEDADESOCASIONADASPORVIRUSENCAADEAZCARENELOCCIDENTEDEMXICO.pdf",
+          "httpsrepository.agrosavia.coserverapicorebitstream.pdf"
+        ],
+        "ablation_no_rag": {
+          "faithfulness": 0.6499809200323902,
+          "answer_relevance": 0.7446405297517776,
+          "ndcg_at_5": 0.0,
+          "hallucination_rate": 0.35001907996760984
+        }
       },
       {
         "id": "redrot_sintomas",
-        "faithfulness": 0.5740740740740741,
-        "answer_relevance": 0.6666666666666666,
-        "context_precision": 0.8,
-        "hallucination_rate": 0.42592592592592593,
-        "in_domain": true
+        "question": "¿Qué es la podredumbre roja y cómo afecta la caña?",
+        "faithfulness": 0.8022704574741235,
+        "answer_relevance": 0.7906493385632832,
+        "ndcg_at_5": 0.9891752937529216,
+        "hallucination_rate": 0.1977295425258765,
+        "retrieval_method": "semantic",
+        "in_domain": true,
+        "sources": [
+          "podredumbre_roja_redrot_cana.md",
+          "manejo_integrado_enfermedades_cana.md",
+          "AnOverviewofMajorFungalDiseasesofSugarcaneinIndia.pdf",
+          "AnOverviewofMajorFungalDiseasesofSugarcaneinIndia.pdf",
+          "RAASAfinal2022.pdf"
+        ],
+        "ablation_no_rag": {
+          "faithfulness": 0.6794745047887166,
+          "answer_relevance": 0.7778494973977407,
+          "ndcg_at_5": 0.0,
+          "hallucination_rate": 0.3205254952112834
+        }
       },
       {
         "id": "yellow_sintomas",
-        "faithfulness": 0.5714285714285714,
-        "answer_relevance": 0.8571428571428571,
-        "context_precision": 1.0,
-        "hallucination_rate": 0.4285714285714286,
-        "in_domain": true
+        "question": "¿Cuáles son los síntomas del amarillamiento en hojas de caña?",
+        "faithfulness": 0.8239597477164924,
+        "answer_relevance": 0.8507400517662366,
+        "ndcg_at_5": 0.9923582192395098,
+        "hallucination_rate": 0.17604025228350761,
+        "retrieval_method": "semantic",
+        "in_domain": true,
+        "sources": [
+          "amarillamiento_yellow_cana.md",
+          "ENFERMEDADESOCASIONADASPORVIRUSENCAADEAZCARENELOCCIDENTEDEMXICO.pdf",
+          "edlca.pdf",
+          "EscalasEvaluacinEnfermedades.pdf",
+          "GUIA-DE-INSECTOS-PLAGAS-DE-LA-CANA-DE-AZUCAR.pdf"
+        ],
+        "ablation_no_rag": {
+          "faithfulness": 0.7174027895170545,
+          "answer_relevance": 0.8500306864579519,
+          "ndcg_at_5": 0.0,
+          "hallucination_rate": 0.2825972104829455
+        }
       },
       {
         "id": "healthy_monitoreo",
-        "faithfulness": 0.453125,
-        "answer_relevance": 0.8571428571428571,
-        "context_precision": 0.8,
-        "hallucination_rate": 0.546875,
-        "in_domain": true
+        "question": "¿Qué prácticas se recomiendan para mantener hojas sanas en caña?",
+        "faithfulness": 0.7214018523693084,
+        "answer_relevance": 0.9020061746239663,
+        "ndcg_at_5": 0.995129891283519,
+        "hallucination_rate": 0.2785981476306916,
+        "retrieval_method": "semantic",
+        "in_domain": true,
+        "sources": [
+          "enfermedades_cana_azucar.md",
+          "hoja_sana_healthy_cana.md",
+          "DE00006_EXAMENCOMPLEXIVO.pdf",
+          "gm_enfermedades_2016_Cartilla_didactica_No2.pdf",
+          "Guia-Tecnica-del-Canero-PROICSA.pdf"
+        ],
+        "ablation_no_rag": {
+          "faithfulness": 0.6456497387978637,
+          "answer_relevance": 0.911297157406807,
+          "ndcg_at_5": 0.0,
+          "hallucination_rate": 0.3543502612021363
+        }
       },
       {
         "id": "manejo_integrado",
-        "faithfulness": 0.47619047619047616,
-        "answer_relevance": 0.8571428571428571,
-        "context_precision": 1.0,
-        "hallucination_rate": 0.5238095238095238,
-        "in_domain": true
+        "question": "¿Qué es el manejo integrado de enfermedades foliares en caña de azúcar?",
+        "faithfulness": 0.7700629187197913,
+        "answer_relevance": 0.8990968257188796,
+        "ndcg_at_5": 0.99874102539526,
+        "hallucination_rate": 0.22993708128020873,
+        "retrieval_method": "semantic",
+        "in_domain": true,
+        "sources": [
+          "manejo_integrado_enfermedades_cana.md",
+          "Guia-Tecnica-del-Canero-PROICSA.pdf",
+          "edlca.pdf",
+          "Guia-Tecnica-del-Canero-PROICSA.pdf",
+          "Cartilla_Plagas-de-la-cana-de-azucar-en-Colombia_05-01-2026.pdf"
+        ],
+        "ablation_no_rag": {
+          "faithfulness": 0.6765415235263545,
+          "answer_relevance": 0.8449359446763993,
+          "ndcg_at_5": 0.0,
+          "hallucination_rate": 0.32345847647364545
+        }
       },
       {
         "id": "bacterial_blight",
-        "faithfulness": 0.4375,
-        "answer_relevance": 0.75,
-        "context_precision": 1.0,
-        "hallucination_rate": 0.5625,
-        "in_domain": true
+        "question": "¿Cuáles son los síntomas del tizón bacteriano en caña de azúcar?",
+        "faithfulness": 0.683370844798513,
+        "answer_relevance": 0.7998689964413643,
+        "ndcg_at_5": 0.977989985523785,
+        "hallucination_rate": 0.31662915520148704,
+        "retrieval_method": "semantic",
+        "in_domain": true,
+        "sources": [
+          "EscalasEvaluacinEnfermedades.pdf",
+          "MANUAL ENFERMEDAD DE CANA.pdf",
+          "ENFERMEDADESOCASIONADASPORVIRUSENCAADEAZCARENELOCCIDENTEDEMXICO.pdf",
+          "MANUAL ENFERMEDAD DE CANA.pdf",
+          "Guia-Tecnica-del-Canero-PROICSA.pdf"
+        ],
+        "ablation_no_rag": {
+          "faithfulness": 0.6731856250051242,
+          "answer_relevance": 0.8396297946572304,
+          "ndcg_at_5": 0.0,
+          "hallucination_rate": 0.32681437499487576
+        }
       },
       {
         "id": "fuera_dominio",
-        "faithfulness": 0.17391304347826086,
-        "answer_relevance": 0.0,
-        "context_precision": 1.0,
-        "hallucination_rate": 0.8260869565217391,
-        "in_domain": false
+        "question": "¿Quién ganó el último mundial de fútbol?",
+        "faithfulness": 0.4534529026816873,
+        "answer_relevance": 0.3348552349023521,
+        "ndcg_at_5": 0.9980764572751696,
+        "hallucination_rate": 0.5465470973183126,
+        "retrieval_method": "semantic",
+        "in_domain": false,
+        "sources": [
+          "st_40.pdf",
+          "st_30.pdf",
+          "st_40.pdf",
+          "EscalasEvaluacinEnfermedades.pdf",
+          "st_40.pdf"
+        ],
+        "ablation_no_rag": {
+          "faithfulness": 0.3755128651857376,
+          "answer_relevance": 0.6570712140202523,
+          "ndcg_at_5": 0.0,
+          "hallucination_rate": 0.6244871348142624
+        }
       }
     ],
     "bootstrap": [
       {
         "metric": "faithfulness",
-        "mean": 0.5328719950876095,
-        "std": 0.07576288701345008,
-        "ci_lower": 0.4808499755392175,
-        "ci_upper": 0.5845291723767546,
+        "mean": 0.7626171599137888,
+        "std": 0.05472991660215349,
+        "ci_lower": 0.7250814113697684,
+        "ci_upper": 0.8000132097058794,
         "n_samples": 7,
         "n_bootstrap": 5000,
         "ci_level": 0.95
       },
       {
         "metric": "answer_relevance",
-        "mean": 0.7778911564625851,
-        "std": 0.10794859542828739,
-        "ci_lower": 0.7020408163265305,
-        "ci_upper": 0.8418367346938774,
+        "mean": 0.8322875360080174,
+        "std": 0.05297668438944414,
+        "ci_lower": 0.7986604481431699,
+        "ci_upper": 0.8706207599242527,
         "n_samples": 7,
         "n_bootstrap": 5000,
         "ci_level": 0.95
       },
       {
-        "metric": "context_precision",
-        "mean": 0.8571428571428571,
-        "std": 0.22253945610567472,
-        "ci_lower": 0.6857142857142858,
-        "ci_upper": 0.9714285714285714,
+        "metric": "ndcg_at_5",
+        "mean": 0.9902035495340014,
+        "std": 0.007354461429569236,
+        "ci_lower": 0.9847905573009715,
+        "ci_upper": 0.9948847046225533,
         "n_samples": 7,
         "n_bootstrap": 5000,
         "ci_level": 0.95
       },
       {
         "metric": "hallucination_rate",
-        "mean": 0.4671280049123904,
-        "std": 0.07576288701345008,
-        "ci_lower": 0.41710433773353056,
-        "ci_upper": 0.5195134327677431,
+        "mean": 0.23738284008621127,
+        "std": 0.05472991660215348,
+        "ci_lower": 0.20109219288930932,
+        "ci_upper": 0.276445695467588,
         "n_samples": 7,
         "n_bootstrap": 5000,
         "ci_level": 0.95
       }
-    ]
+    ],
+    "ablation": {
+      "with_rag": {
+        "faithfulness": 0.7626171599137888,
+        "answer_relevance": 0.8322875360080174,
+        "ndcg_at_5": 0.9902035495340014,
+        "hallucination_rate": 0.23738284008621127
+      },
+      "without_rag": {
+        "faithfulness": 0.6832722440310979,
+        "answer_relevance": 0.8360949873356592,
+        "ndcg_at_5": 0.0,
+        "hallucination_rate": 0.31672775596890224
+      },
+      "delta": {
+        "faithfulness": 0.07934491588269088,
+        "answer_relevance": -0.00380745132764182,
+        "ndcg_at_5": 0.9902035495340014,
+        "hallucination_rate": -0.07934491588269096
+      },
+      "n_cases": 7
+    }
   },
   "thresholds": {
-    "faithfulness_min": 0.2,
-    "answer_relevance_min": 0.1,
-    "context_precision_min": 0.35,
-    "hallucination_rate_max": 0.8
+    "faithfulness_min": 0.15,
+    "answer_relevance_min": 0.2,
+    "ndcg_at_5_min": 0.65,
+    "hallucination_rate_max": 0.85
   },
   "threshold_failures": [],
-  "ragas_metrics": null
+  "corpus_report": {
+    "knowledge_dir": "C:\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\src\\app\\knowledge_base",
+    "document_count": 46,
+    "chunk_count": 1923,
+    "file_types": {
+      ".pdf": 39,
+      ".md": 7
+    },
+    "chunking": {
+      "strategy": "Markdown headings when available; sliding character window otherwise",
+      "chunk_size_chars": 1400,
+      "chunk_overlap_chars": 300,
+      "chunk_stride_chars": 1100
+    },
+    "retrieval": {
+      "method": "semantic",
+      "backend": {
+        "method": "semantic",
+        "model": "paraphrase-multilingual-mpnet-base-v2",
+        "provider": "sentence-transformers",
+        "openai_model": null,
+        "finetuned": false,
+        "index": "FAISS IndexFlatIP",
+        "embedding_dim": 768,
+        "corpus_size": 1923,
+        "preprocessing": "agronomy_term_expansion"
+      },
+      "scoring_weights": {
+        "retrieval_score": 0.55,
+        "keyword_overlap": 0.25,
+        "disease_boost_max": 0.55
+      },
+      "mmr": {
+        "enabled": true,
+        "lambda_param": 0.72
+      },
+      "default_top_k": 5,
+      "min_score": 0.08
+    },
+    "disease_chunk_distribution": {
+      "general": 1481,
+      "Mosaic": 159,
+      "Yellow": 111,
+      "Healthy": 96,
+      "Rust": 201,
+      "Bacterial Blight": 23,
+      "RedRot": 7
+    },
+    "source_files": [
+      {
+        "source": "14373_5139_Identificación_y_manejo_de_plagas_y_enfermedades_en_Caña_.pdf",
+        "suffix": ".pdf",
+        "text_chars": 27281,
+        "chunks": 21
+      },
+      {
+        "source": "15 Sugarcane MCpdfpdf.pdf",
+        "suffix": ".pdf",
+        "text_chars": 13385,
+        "chunks": 10
+      },
+      {
+        "source": "2._GUIA_PARA_EL_MANEJO_FITOSANITARIO_DE_LA_CA_A_DE_AZ_CAR.pdf",
+        "suffix": ".pdf",
+        "text_chars": 11636,
+        "chunks": 10
+      },
+      {
+        "source": "21052_417.pdf",
+        "suffix": ".pdf",
+        "text_chars": 23176,
+        "chunks": 18
+      },
+      {
+        "source": "23182_4671.pdf",
+        "suffix": ".pdf",
+        "text_chars": 10282,
+        "chunks": 8
+      },
+      {
+        "source": "6. La mancha roja.pdf",
+        "suffix": ".pdf",
+        "text_chars": 12499,
+        "chunks": 10
+      },
+      {
+        "source": "8-1.pdf",
+        "suffix": ".pdf",
+        "text_chars": 30929,
+        "chunks": 24
+      },
+      {
+        "source": "8-1a.pdf",
+        "suffix": ".pdf",
+        "text_chars": 30929,
+        "chunks": 24
+      },
+      {
+        "source": "81212_67186.pdf",
+        "suffix": ".pdf",
+        "text_chars": 62155,
+        "chunks": 47
+      },
+      {
+        "source": "amarillamiento_yellow_cana.md",
+        "suffix": ".md",
+        "text_chars": 1414,
+        "chunks": 2
+      },
+      {
+        "source": "AnOverviewofMajorFungalDiseasesofSugarcaneinIndia.pdf",
+        "suffix": ".pdf",
+        "text_chars": 92360,
+        "chunks": 69
+      },
+      {
+        "source": "cartilla-cana-ICA.pdf",
+        "suffix": ".pdf",
+        "text_chars": 86011,
+        "chunks": 67
+      },
+      {
+        "source": "Cartilla_Plagas-de-la-cana-de-azucar-en-Colombia_05-01-2026.pdf",
+        "suffix": ".pdf",
+        "text_chars": 54900,
+        "chunks": 41
+      },
+      {
+        "source": "CUARENTENA PLAGAS-Y-ENFERMEDADES-EXOTICAS-DE-LA-CAÑA-DE-AZÚCAR.pdf",
+        "suffix": ".pdf",
+        "text_chars": 18007,
+        "chunks": 14
+      },
+      {
+        "source": "DE00006_EXAMENCOMPLEXIVO.pdf",
+        "suffix": ".pdf",
+        "text_chars": 27884,
+        "chunks": 23
+      },
+      {
+        "source": "Dialnet-ManejoDeLaNutricionVariedadesYEnfermedadesFungicas-10138094.pdf",
+        "suffix": ".pdf",
+        "text_chars": 32479,
+        "chunks": 26
+      },
+      {
+        "source": "drones-06-00230.pdf",
+        "suffix": ".pdf",
+        "text_chars": 82984,
+        "chunks": 64
+      },
+      {
+        "source": "edlca.pdf",
+        "suffix": ".pdf",
+        "text_chars": 11844,
+        "chunks": 9
+      },
+      {
+        "source": "enfermedades_cana_azucar.md",
+        "suffix": ".md",
+        "text_chars": 2038,
+        "chunks": 2
+      },
+      {
+        "source": "Enfermedades_de_la_cana_de_azucar_en_Col.pdf",
+        "suffix": ".pdf",
+        "text_chars": 62279,
+        "chunks": 48
+      },
+      {
+        "source": "ENFERMEDADESOCASIONADASPORVIRUSENCAADEAZCARENELOCCIDENTEDEMXICO.pdf",
+        "suffix": ".pdf",
+        "text_chars": 49054,
+        "chunks": 38
+      },
+      {
+        "source": "EntreCaeros08_Separata_ErickChavarra.pdf",
+        "suffix": ".pdf",
+        "text_chars": 19821,
+        "chunks": 15
+      },
+      {
+        "source": "EscalasEvaluacinEnfermedades.pdf",
+        "suffix": ".pdf",
+        "text_chars": 65713,
+        "chunks": 51
+      },
+      {
+        "source": "gm_enfermedades_2016_Cartilla_didactica_No2.pdf",
+        "suffix": ".pdf",
+        "text_chars": 27085,
+        "chunks": 21
+      },
+      {
+        "source": "GUIA-DE-INSECTOS-PLAGAS-DE-LA-CANA-DE-AZUCAR.pdf",
+        "suffix": ".pdf",
+        "text_chars": 73043,
+        "chunks": 55
+      },
+      {
+        "source": "Guia-Tecnica-del-Canero-PROICSA.pdf",
+        "suffix": ".pdf",
+        "text_chars": 301268,
+        "chunks": 228
+      },
+      {
+        "source": "hoja_sana_healthy_cana.md",
+        "suffix": ".md",
+        "text_chars": 935,
+        "chunks": 1
+      },
+      {
+        "source": "httpsrepository.agrosavia.coserverapicorebitstream.pdf",
+        "suffix": ".pdf",
+        "text_chars": 23176,
+        "chunks": 18
+      },
+      {
+        "source": "IDENTI_1.PDF",
+        "suffix": ".pdf",
+        "text_chars": 11681,
+        "chunks": 9
+      },
+      {
+        "source": "Identificacion-y-reconocimiento-de-enfermedades-de-la-cana-de-azucar.pdf",
+        "suffix": ".pdf",
+        "text_chars": 11681,
+        "chunks": 9
+      },
+      {
+        "source": "libro_p265-293.pdf",
+        "suffix": ".pdf",
+        "text_chars": 62156,
+        "chunks": 47
+      },
+      {
+        "source": "MANEJO_1.PDF",
+        "suffix": ".pdf",
+        "text_chars": 27536,
+        "chunks": 22
+      },
+      {
+        "source": "manejo_integrado_enfermedades_cana.md",
+        "suffix": ".md",
+        "text_chars": 2130,
+        "chunks": 2
+      },
+      {
+        "source": "MANUAL ENFERMEDAD DE CANA.pdf",
+        "suffix": ".pdf",
+        "text_chars": 84389,
+        "chunks": 67
+      },
+      {
+        "source": "manualplagasenfs-canaazucar-mor.pdf",
+        "suffix": ".pdf",
+        "text_chars": 31372,
+        "chunks": 25
+      },
+      {
+        "source": "MonografiaMIPencaa.pdf",
+        "suffix": ".pdf",
+        "text_chars": 130896,
+        "chunks": 102
+      },
+      {
+        "source": "mosaico_cana.md",
+        "suffix": ".md",
+        "text_chars": 1411,
+        "chunks": 2
+      },
+      {
+        "source": "podredumbre_roja_redrot_cana.md",
+        "suffix": ".md",
+        "text_chars": 1405,
+        "chunks": 2
+      },
+      {
+        "source": "Principales_enfermedades_que_afectan_el_cultivo_de.pdf",
+        "suffix": ".pdf",
+        "text_chars": 30929,
+        "chunks": 24
+      },
+      {
+        "source": "RAASAfinal2022.pdf",
+        "suffix": ".pdf",
+        "text_chars": 40762,
+        "chunks": 31
+      },
+      {
+        "source": "roya_rust_cana.md",
+        "suffix": ".md",
+        "text_chars": 1521,
+        "chunks": 2
+      },
+      {
+        "source": "s41598-025-34681-1.pdf",
+        "suffix": ".pdf",
+        "text_chars": 72239,
+        "chunks": 55
+      },
+      {
+        "source": "st_30.pdf",
+        "suffix": ".pdf",
+        "text_chars": 144220,
+        "chunks": 120
+      },
+      {
+        "source": "st_38.pdf",
+        "suffix": ".pdf",
+        "text_chars": 201116,
+        "chunks": 162
+      },
+      {
+        "source": "st_40.pdf",
+        "suffix": ".pdf",
+        "text_chars": 290772,
+        "chunks": 242
+      },
+      {
+        "source": "XENbhxqtitZJdyOSemnDYflFhmVmbhuq.pdf",
+        "suffix": ".pdf",
+        "text_chars": 46534,
+        "chunks": 36
+      }
+    ],
+    "chunk_length_stats_chars": {
+      "min": 21,
+      "max": 1400,
+      "mean": 1274.204888195528,
+      "median": 1331
+    },
+    "chunk_length_stats_token_proxy": {
+      "min": 3,
+      "max": 204,
+      "mean": 88.90535621424857,
+      "median": 91
+    }
+  },
+  "ragas_metrics": null,
+  "methodological_note": "Métricas RAG oficiales del proyecto. nDCG@5 usa relevancia semántica (similitud coseno entre embeddings de consulta y fragmento). Retrieval: sentence-transformers multilingüe + FAISS."
 }

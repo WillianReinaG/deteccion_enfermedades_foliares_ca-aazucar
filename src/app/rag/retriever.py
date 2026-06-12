@@ -1,19 +1,42 @@
+"""Recuperador documental modular para el sistema RAG agronómico.
+
+Integra ingesta (``ingestion``), representación vectorial (``embeddings``) y
+búsqueda con diversificación MMR. Soporta tres métodos comparables:
+
+    - ``tfidf``: recuperación léxica TF-IDF + coseno.
+    - ``bm25``: Okapi BM25 probabilístico.
+    - ``semantic``: embeddings multilingües preentrenados + FAISS.
+    - ``hybrid``: fusión RRF semantic + BM25 (producción por defecto).
+
+Configurable vía ``RAG_RETRIEVAL_METHOD`` en ``.env``.
+"""
 from __future__ import annotations
+
+import statistics
+from collections import Counter
 from pathlib import Path
-from typing import List, Dict, Optional, Set
-import re
-from sklearn.feature_extraction.text import TfidfVectorizer
+from typing import Any, Dict, List, Optional, Set
+
+import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
-from app.config.settings import KNOWLEDGE_DIR
 
-try:
-    from pypdf import PdfReader
-except Exception:
-    PdfReader = None
-
-SPANISH_STOP = frozenset(
-    "a al algo algunas algunos ante antes como con contra cual cuales cuando de del desde donde dos el ella ellas ellos en entre era eran es esa esas ese eso esos esta estaba estaban estamos estan estas este esto estos fue fueron ha habia habian han hasta hay la las le les lo los me mi mis mucho muy nos o para pero por porque que quien se sin sobre su sus tambien te tiene todo tu tus un una uno usted ustedes y ya".split()
+from app.config.settings import KNOWLEDGE_DIR, RAG_RETRIEVAL_METHOD, SEMANTIC_MODEL_NAME
+from app.rag.embeddings import (
+    DEFAULT_SEMANTIC_MODEL,
+    EmbeddingBackend,
+    TfidfBackend,
+    build_corpus_texts,
+    create_backend,
 )
+from app.rag.ingestion import (
+    CHUNK_OVERLAP_CHARS,
+    CHUNK_SIZE_CHARS,
+    CHUNK_STRIDE_CHARS,
+    DocumentChunk,
+    load_corpus,
+    tokenize,
+)
+from app.rag.preprocessing import enrich_query
 
 DISEASE_SYNONYMS = {
     "Rust": "roya rust puccinia melanocephala manchas naranja rojizas pustulas uredinios esporas hoja caña azúcar control fungicida manejo integrado",
@@ -40,129 +63,47 @@ QUERY_INTENT_KEYWORDS = {
     "diagnostico": ["diagnóstico", "diagnostico", "confirmar", "diferenciar", "identificar", "detect"],
 }
 
-
-def _read_file(path: Path) -> str:
-    if path.suffix.lower() in {".txt", ".md"}:
-        return path.read_text(encoding="utf-8", errors="ignore")
-    if path.suffix.lower() == ".pdf" and PdfReader is not None:
-        reader = PdfReader(str(path))
-        return "\n".join(page.extract_text() or "" for page in reader.pages)
-    return ""
+DEFAULT_TOP_K = 5
+MMR_LAMBDA = 0.72
+MIN_SCORE = 0.08
 
 
-def _normalize(text: str) -> str:
-    return re.sub(r"\s+", " ", text).strip()
+class ModularRetriever:
+    """Recuperador con backend intercambiable y diversificación MMR."""
 
-
-def _tokenize(text: str) -> Set[str]:
-    tokens = re.findall(r"[a-záéíóúñü0-9]+", text.lower())
-    return {t for t in tokens if len(t) > 2 and t not in SPANISH_STOP}
-
-
-def _detect_diseases(text: str, source: str) -> Set[str]:
-    blob = f"{source} {text}".lower()
-    found: Set[str] = set()
-    for disease, hints in DISEASE_FILE_HINTS.items():
-        if disease.lower() in blob:
-            found.add(disease)
-            continue
-        if any(h in blob for h in hints):
-            found.add(disease)
-    return found
-
-
-def _chunks_markdown(text: str, source: str, max_size: int = 900) -> List[Dict]:
-    """Divide por encabezados Markdown para conservar contexto semántico por enfermedad."""
-    text = text.strip()
-    if not text:
-        return []
-    sections: List[Dict] = []
-    current_title = "general"
-    current_lines: List[str] = []
-
-    def flush():
-        if not current_lines:
-            return
-        body = _normalize("\n".join(current_lines))
-        if not body:
-            return
-        parts = [body]
-        if len(body) > max_size:
-            parts = []
-            start = 0
-            while start < len(body):
-                parts.append(body[start : start + max_size])
-                start += max(1, max_size - 200)
-        for i, part in enumerate(parts):
-            diseases = _detect_diseases(f"{current_title} {part}", source)
-            sections.append(
-                {
-                    "title": current_title,
-                    "text": part,
-                    "diseases": sorted(diseases),
-                    "chunk_id": len(sections),
-                }
-            )
-
-    for line in text.splitlines():
-        if re.match(r"^#{1,4}\s+", line):
-            flush()
-            current_title = re.sub(r"^#{1,4}\s+", "", line).strip()
-            current_lines = []
-        else:
-            current_lines.append(line)
-    flush()
-    if not sections:
-        plain = _normalize(text)
-        for i, start in enumerate(range(0, len(plain), max_size - 200)):
-            part = plain[start : start + max_size]
-            if part:
-                sections.append(
-                    {
-                        "title": "general",
-                        "text": part,
-                        "diseases": sorted(_detect_diseases(part, source)),
-                        "chunk_id": i,
-                    }
-                )
-    return sections
-
-
-class LocalRetriever:
-    def __init__(self, knowledge_dir: Path = KNOWLEDGE_DIR):
+    def __init__(
+        self,
+        knowledge_dir: Path = KNOWLEDGE_DIR,
+        method: str = RAG_RETRIEVAL_METHOD,
+        semantic_model: str = SEMANTIC_MODEL_NAME,
+    ):
         self.knowledge_dir = Path(knowledge_dir)
+        self.method = method.lower().strip()
+        self.semantic_model = semantic_model
+        self.chunks: List[DocumentChunk] = []
         self.docs: List[Dict] = []
-        self.vectorizer = TfidfVectorizer(
-            stop_words=list(SPANISH_STOP),
-            ngram_range=(1, 2),
-            min_df=1,
-            sublinear_tf=True,
-            max_df=0.95,
-        )
-        self.matrix = None
+        self.source_files: List[Dict[str, Any]] = []
+        self.corpus_texts: List[str] = []
+        self.backend: EmbeddingBackend = create_backend(method, semantic_model=semantic_model)
+        self._tfidf_for_mmr: Optional[TfidfBackend] = None
         self._build()
 
-    def _build(self):
-        self.knowledge_dir.mkdir(parents=True, exist_ok=True)
-        self.docs = []
-        for path in sorted(self.knowledge_dir.glob("**/*")):
-            if path.is_file() and path.suffix.lower() in {".txt", ".md", ".pdf"}:
-                text = _read_file(path)
-                for chunk in _chunks_markdown(text, path.name):
-                    self.docs.append(
-                        {
-                            "source": path.name,
-                            "chunk_id": chunk["chunk_id"],
-                            "title": chunk["title"],
-                            "text": chunk["text"],
-                            "diseases": chunk["diseases"],
-                        }
-                    )
-        if self.docs:
-            corpus = [f"{d['title']} {d['text']} {' '.join(d['diseases'])}" for d in self.docs]
-            self.matrix = self.vectorizer.fit_transform(corpus)
+    def _build(self) -> None:
+        self.chunks, self.source_files = load_corpus(self.knowledge_dir)
+        self.docs = [c.to_dict() for c in self.chunks]
+        self.corpus_texts = build_corpus_texts(self.chunks)
+        if self.corpus_texts:
+            self.backend.fit(self.corpus_texts)
+            if self.method != "tfidf":
+                self._tfidf_for_mmr = TfidfBackend()
+                self._tfidf_for_mmr.fit(self.corpus_texts)
 
-    def expand_query(self, query: str, prediction: Dict | None = None, history: List[Dict] | None = None) -> str:
+    def expand_query(
+        self,
+        query: str,
+        prediction: Dict | None = None,
+        history: List[Dict] | None = None,
+    ) -> str:
         parts = [query]
         q_lower = query.lower()
         for intent, kws in QUERY_INTENT_KEYWORDS.items():
@@ -170,9 +111,7 @@ class LocalRetriever:
                 parts.append(intent)
         if prediction:
             disease = prediction.get("class_name", "")
-            parts.append(
-                f"enfermedad {disease} caña de azúcar síntomas manejo control prevención diagnóstico"
-            )
+            parts.append(f"enfermedad {disease} caña de azúcar síntomas manejo control prevención diagnóstico")
             parts.append(DISEASE_SYNONYMS.get(disease, ""))
             for hint in DISEASE_FILE_HINTS.get(disease, []):
                 parts.append(hint)
@@ -183,10 +122,10 @@ class LocalRetriever:
                 if m.get("role") in {"user", "assistant"}
             )
             parts.append(recent[:800])
-        return " ".join(parts)
+        return enrich_query(" ".join(parts))
 
     def _keyword_score(self, query_tokens: Set[str], doc: Dict) -> float:
-        doc_tokens = _tokenize(f"{doc['title']} {doc['text']} {' '.join(doc['diseases'])}")
+        doc_tokens = tokenize(f"{doc['title']} {doc['text']} {' '.join(doc['diseases'])}")
         if not query_tokens or not doc_tokens:
             return 0.0
         overlap = len(query_tokens & doc_tokens)
@@ -209,20 +148,23 @@ class LocalRetriever:
             boost += 0.10
         return min(boost, 0.55)
 
-    def _mmr_select(
-        self,
-        candidates: List[Dict],
-        query_vec,
-        k: int,
-        lambda_param: float = 0.72,
-    ) -> List[Dict]:
-        """Maximal Marginal Relevance: diversifica fuentes sin perder relevancia."""
+    def _normalize_scores(self, scores: np.ndarray) -> np.ndarray:
+        if scores.size == 0:
+            return scores
+        min_s, max_s = float(scores.min()), float(scores.max())
+        if max_s - min_s < 1e-9:
+            return np.ones_like(scores, dtype=float)
+        return (scores - min_s) / (max_s - min_s)
+
+    def _mmr_select(self, candidates: List[Dict], k: int, lambda_param: float = MMR_LAMBDA) -> List[Dict]:
         if not candidates:
             return []
         selected: List[Dict] = []
         remaining = candidates.copy()
-        doc_texts = [f"{d['title']} {d['text']}" for d in self.docs]
-        doc_matrix = self.vectorizer.transform(doc_texts) if self.matrix is not None else None
+        mmr_backend = self._tfidf_for_mmr if self._tfidf_for_mmr else (
+            self.backend if isinstance(self.backend, TfidfBackend) else None
+        )
+        doc_matrix = mmr_backend.matrix if mmr_backend and mmr_backend.matrix is not None else None
 
         while remaining and len(selected) < k:
             best_idx, best_score = -1, -1.0
@@ -230,54 +172,136 @@ class LocalRetriever:
                 rel = cand["final_score"]
                 div_penalty = 0.0
                 if selected and doc_matrix is not None:
-                    cand_idx = next(
-                        (j for j, d in enumerate(self.docs) if d["source"] == cand["source"] and d["chunk_id"] == cand["chunk_id"]),
-                        None,
-                    )
+                    cand_idx = cand.get("global_chunk_id")
                     if cand_idx is not None:
                         sims = []
                         for sel in selected:
-                            sel_idx = next(
-                                (j for j, d in enumerate(self.docs) if d["source"] == sel["source"] and d["chunk_id"] == sel["chunk_id"]),
-                                None,
-                            )
+                            sel_idx = sel.get("global_chunk_id")
                             if sel_idx is not None:
                                 sims.append(float(cosine_similarity(doc_matrix[cand_idx], doc_matrix[sel_idx])[0, 0]))
                         if sims:
                             div_penalty = max(sims)
-                mmr = lambda_param * rel - (1 - lambda_param) * div_penalty
-                if mmr > best_score:
-                    best_score, best_idx = mmr, i
+                mmr_score = lambda_param * rel - (1 - lambda_param) * div_penalty
+                if mmr_score > best_score:
+                    best_score, best_idx = mmr_score, i
             if best_idx < 0:
                 break
-            selected.append(remaining.pop(best_idx))
+            chosen = remaining.pop(best_idx)
+            chosen["mmr_score"] = best_score
+            selected.append(chosen)
         return selected
 
     def search(
         self,
         query: str,
-        k: int = 5,
+        k: int = DEFAULT_TOP_K,
         prediction: Dict | None = None,
         history: List[Dict] | None = None,
-        min_score: float = 0.08,
+        min_score: float = MIN_SCORE,
     ) -> List[Dict]:
-        if not self.docs or self.matrix is None:
+        if not self.docs:
             return []
+
         expanded = self.expand_query(query, prediction, history)
-        q_vec = self.vectorizer.transform([expanded])
-        tfidf_sims = cosine_similarity(q_vec, self.matrix)[0]
-        query_tokens = _tokenize(expanded)
+        query_tokens = tokenize(expanded)
+        pool_size = max(k * 5, 20) if self.method in {"semantic", "hybrid"} else max(k * 3, 12)
+        idx, raw_scores = self.backend.score(expanded, top_k=pool_size)
+        norm_scores = self._normalize_scores(raw_scores)
 
         candidates: List[Dict] = []
-        for i, doc in enumerate(self.docs):
-            tfidf = float(tfidf_sims[i])
+        for rank, (doc_idx, retrieval_score, norm_score) in enumerate(
+            zip(idx, raw_scores, norm_scores), start=1
+        ):
+            doc = self.docs[int(doc_idx)]
             kw = self._keyword_score(query_tokens, doc)
             disease_b = self._disease_boost(doc, prediction)
-            final = 0.55 * tfidf + 0.25 * kw + disease_b
+            final = 0.55 * float(norm_score) + 0.30 * kw + disease_b
             if final < min_score and not (prediction and disease_b > 0.2):
                 continue
-            candidates.append({**doc, "score": tfidf, "final_score": final})
+            candidates.append(
+                {
+                    **doc,
+                    "rank_pre_mmr": rank,
+                    "score": float(retrieval_score),
+                    "normalized_score": float(norm_score),
+                    "keyword_score": kw,
+                    "disease_boost": disease_b,
+                    "final_score": final,
+                    "expanded_query": expanded,
+                    "retrieval_method": self.method,
+                }
+            )
 
         candidates.sort(key=lambda x: x["final_score"], reverse=True)
-        top_pool = candidates[: max(k * 3, 12)]
-        return self._mmr_select(top_pool, q_vec, k)
+        for rank, cand in enumerate(candidates, start=1):
+            cand["rank_pre_mmr"] = rank
+
+        selected = self._mmr_select(candidates[:pool_size], k)
+        for rank, item in enumerate(selected, start=1):
+            item["rank"] = rank
+        return selected
+
+    def corpus_report(self) -> Dict[str, Any]:
+        lengths = [int(d.get("char_len", len(d["text"]))) for d in self.docs]
+        token_lengths = [int(d.get("token_len_proxy", 0)) for d in self.docs]
+        disease_counts = Counter()
+        for d in self.docs:
+            if d.get("diseases"):
+                disease_counts.update(d["diseases"])
+            else:
+                disease_counts.update(["general"])
+
+        suffix_counts = Counter(f["suffix"] for f in self.source_files)
+        backend_meta = self.backend.metadata
+        report: Dict[str, Any] = {
+            "knowledge_dir": str(self.knowledge_dir),
+            "document_count": len(self.source_files),
+            "chunk_count": len(self.docs),
+            "file_types": dict(suffix_counts),
+            "chunking": {
+                "strategy": "Markdown headings when available; sliding character window otherwise",
+                "chunk_size_chars": CHUNK_SIZE_CHARS,
+                "chunk_overlap_chars": CHUNK_OVERLAP_CHARS,
+                "chunk_stride_chars": CHUNK_STRIDE_CHARS,
+            },
+            "retrieval": {
+                "method": self.method,
+                "backend": backend_meta,
+                "scoring_weights": {
+                    "retrieval_score": 0.55,
+                    "keyword_overlap": 0.25,
+                    "disease_boost_max": 0.55,
+                },
+                "mmr": {"enabled": True, "lambda_param": MMR_LAMBDA},
+                "default_top_k": DEFAULT_TOP_K,
+                "min_score": MIN_SCORE,
+            },
+            "disease_chunk_distribution": dict(disease_counts),
+            "source_files": self.source_files,
+        }
+        if lengths:
+            report["chunk_length_stats_chars"] = {
+                "min": min(lengths),
+                "max": max(lengths),
+                "mean": statistics.mean(lengths),
+                "median": statistics.median(lengths),
+            }
+        if token_lengths:
+            report["chunk_length_stats_token_proxy"] = {
+                "min": min(token_lengths),
+                "max": max(token_lengths),
+                "mean": statistics.mean(token_lengths),
+                "median": statistics.median(token_lengths),
+            }
+        return report
+
+
+class LocalRetriever(ModularRetriever):
+    """Alias retrocompatible usado por el agente conversacional."""
+
+    def __init__(self, knowledge_dir: Path = KNOWLEDGE_DIR):
+        super().__init__(
+            knowledge_dir=knowledge_dir,
+            method=RAG_RETRIEVAL_METHOD,
+            semantic_model=SEMANTIC_MODEL_NAME,
+        )

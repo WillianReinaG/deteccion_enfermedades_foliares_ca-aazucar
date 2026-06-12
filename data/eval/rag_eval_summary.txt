@@ -1,18 +1,29 @@
-SugarCane — Evaluación RAG conversacional
-Fecha UTC: 2026-06-09T23:38:20.859587+00:00
+SugarCane — Evaluación RAG conversacional ampliada
+Fecha UTC: 2026-06-12T19:40:23.267224+00:00
 
-=== Métricas proxy (CI / léxicas) ===
-faithfulness_avg:       0.5329
-answer_relevance_avg:   0.7779
-context_precision_avg:  0.8571
-hallucination_rate_avg: 0.4671
+=== Configuración documental y recuperación ===
+Documentos: 46
+Chunks: 1923
+Embeddings / retrieval: semantic
+
+=== Métricas RAG oficiales ===
+faithfulness_avg:       0.7626
+answer_relevance_avg:   0.8323
+ndcg_at_5_avg:          0.9902  (semántica por embeddings)
+hallucination_rate_avg: 0.2374
+
+=== Ablación: sin RAG vs con RAG ===
+Métrica                     Sin RAG    Con RAG      Delta
+faithfulness                 0.6833     0.7626     0.0793
+answer_relevance             0.8361     0.8323    -0.0038
+hallucination_rate           0.3167     0.2374    -0.0793
 
 === Bootstrap (IC 95%, casos en dominio) ===
 Métrica                   Media       DE   IC inf   IC sup    n
-faithfulness             0.5329   0.0758   0.4808   0.5845    7
-answer_relevance         0.7779   0.1079   0.7020   0.8418    7
-context_precision        0.8571   0.2225   0.6857   0.9714    7
-hallucination_rate       0.4671   0.0758   0.4171   0.5195    7
+faithfulness             0.7626   0.0547   0.7251   0.8000    7
+answer_relevance         0.8323   0.0530   0.7987   0.8706    7
+ndcg_at_5                0.9902   0.0074   0.9848   0.9949    7
+hallucination_rate       0.2374   0.0547   0.2011   0.2764    7
 
 RAGAS oficial: no ejecutado (requiere ragas + OPENAI_API_KEY).
 

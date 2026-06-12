@@ -1,0 +1,62 @@
+{
+  "timestamp": "20260612_164609",
+  "benchmark": "C:\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\data\\eval\\retrieval_benchmark.json",
+  "methods": [
+    "tfidf",
+    "bm25",
+    "semantic",
+    "hybrid"
+  ],
+  "k": 5,
+  "best_method_experiment": "bm25",
+  "production_method": "hybrid",
+  "n_queries": 10,
+  "outputs": {
+    "detail": "C:\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\results\\run_20260612_164609\\retrieval_comparison_detail.csv",
+    "summary": "C:\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\results\\run_20260612_164609\\retrieval_comparison_summary.csv",
+    "json": "C:\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\results\\run_20260612_164609\\retrieval_comparison.json",
+    "bar_chart": "C:\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\results\\run_20260612_164609\\figures\\retrieval_methods_comparison.png",
+    "heatmap": "C:\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\results\\run_20260612_164609\\figures\\ndcg_per_query_heatmap.png",
+    "markdown_table": "C:\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\results\\run_20260612_164609\\comparison_table.md",
+    "latex_table": "C:\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\results\\run_20260612_164609\\comparison_table.tex",
+    "report": "C:\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\results\\run_20260612_164609\\RESEARCH_REPORT.md"
+  },
+  "summary": [
+    {
+      "method": "tfidf",
+      "n_queries": 10,
+      "recall_at_1_avg": 0.457979797979798,
+      "recall_at_3_avg": 0.6381313131313131,
+      "recall_at_5_avg": 0.6603535353535354,
+      "mrr_avg": 1.0,
+      "ndcg_at_5_avg": 0.9540412700281781
+    },
+    {
+      "method": "bm25",
+      "n_queries": 10,
+      "recall_at_1_avg": 0.5233838383838384,
+      "recall_at_3_avg": 0.7009090909090909,
+      "recall_at_5_avg": 0.7290909090909091,
+      "mrr_avg": 1.0,
+      "ndcg_at_5_avg": 0.9533129898689596
+    },
+    {
+      "method": "semantic",
+      "n_queries": 10,
+      "recall_at_1_avg": 0.4276262626262626,
+      "recall_at_3_avg": 0.5688383838383839,
+      "recall_at_5_avg": 0.6081313131313132,
+      "mrr_avg": 1.0,
+      "ndcg_at_5_avg": 0.92244772461526
+    },
+    {
+      "method": "hybrid",
+      "n_queries": 10,
+      "recall_at_1_avg": 0.5148989898989899,
+      "recall_at_3_avg": 0.5871717171717171,
+      "recall_at_5_avg": 0.6657070707070707,
+      "mrr_avg": 1.0,
+      "ndcg_at_5_avg": 0.9470784200471556
+    }
+  ]
+}

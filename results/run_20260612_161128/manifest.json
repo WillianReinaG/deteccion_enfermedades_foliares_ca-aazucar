@@ -1,0 +1,51 @@
+{
+  "timestamp": "20260612_161128",
+  "benchmark": "C:\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\data\\eval\\retrieval_benchmark.json",
+  "methods": [
+    "tfidf",
+    "bm25",
+    "semantic"
+  ],
+  "k": 5,
+  "best_method": "bm25",
+  "n_queries": 10,
+  "outputs": {
+    "detail": "C:\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\results\\run_20260612_161128\\retrieval_comparison_detail.csv",
+    "summary": "C:\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\results\\run_20260612_161128\\retrieval_comparison_summary.csv",
+    "json": "C:\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\results\\run_20260612_161128\\retrieval_comparison.json",
+    "bar_chart": "C:\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\results\\run_20260612_161128\\figures\\retrieval_methods_comparison.png",
+    "heatmap": "C:\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\results\\run_20260612_161128\\figures\\ndcg_per_query_heatmap.png",
+    "markdown_table": "C:\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\results\\run_20260612_161128\\comparison_table.md",
+    "latex_table": "C:\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\results\\run_20260612_161128\\comparison_table.tex",
+    "report": "C:\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\results\\run_20260612_161128\\RESEARCH_REPORT.md"
+  },
+  "summary": [
+    {
+      "method": "tfidf",
+      "n_queries": 10,
+      "recall_at_1_avg": 0.5172727272727273,
+      "recall_at_3_avg": 0.6721717171717172,
+      "recall_at_5_avg": 0.7407575757575757,
+      "mrr_avg": 1.0,
+      "ndcg_at_5_avg": 0.9602197648417741
+    },
+    {
+      "method": "bm25",
+      "n_queries": 10,
+      "recall_at_1_avg": 0.5496969696969697,
+      "recall_at_3_avg": 0.6841919191919192,
+      "recall_at_5_avg": 0.7218181818181819,
+      "mrr_avg": 1.0,
+      "ndcg_at_5_avg": 0.9809483451256575
+    },
+    {
+      "method": "semantic",
+      "n_queries": 10,
+      "recall_at_1_avg": 0.4722727272727273,
+      "recall_at_3_avg": 0.581969696969697,
+      "recall_at_5_avg": 0.6303535353535354,
+      "mrr_avg": 1.0,
+      "ndcg_at_5_avg": 0.9685111982286886
+    }
+  ]
+}

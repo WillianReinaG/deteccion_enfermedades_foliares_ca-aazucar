@@ -1,0 +1,335 @@
+{
+  "knowledge_dir": "C:\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\SugarCane ProyectoFinal\\src\\app\\knowledge_base",
+  "document_count": 46,
+  "chunk_count": 3520,
+  "file_types": {
+    ".pdf": 39,
+    ".md": 7
+  },
+  "chunking": {
+    "strategy": "Markdown headings when available; sliding character window otherwise",
+    "chunk_size_chars": 900,
+    "chunk_overlap_chars": 200,
+    "chunk_stride_chars": 700
+  },
+  "retrieval": {
+    "method": "bm25",
+    "backend": {
+      "method": "bm25",
+      "algorithm": "BM25Okapi",
+      "tokenizer": "spanish_stopword_filtered"
+    },
+    "scoring_weights": {
+      "retrieval_score": 0.55,
+      "keyword_overlap": 0.25,
+      "disease_boost_max": 0.55
+    },
+    "mmr": {
+      "enabled": true,
+      "lambda_param": 0.72
+    },
+    "default_top_k": 5,
+    "min_score": 0.08
+  },
+  "disease_chunk_distribution": {
+    "general": 2882,
+    "Mosaic": 231,
+    "Yellow": 148,
+    "Healthy": 132,
+    "Rust": 267,
+    "Bacterial Blight": 30,
+    "RedRot": 12
+  },
+  "source_files": [
+    {
+      "source": "14373_5139_Identificación_y_manejo_de_plagas_y_enfermedades_en_Caña_.pdf",
+      "suffix": ".pdf",
+      "text_chars": 27281,
+      "chunks": 39
+    },
+    {
+      "source": "15 Sugarcane MCpdfpdf.pdf",
+      "suffix": ".pdf",
+      "text_chars": 13385,
+      "chunks": 20
+    },
+    {
+      "source": "2._GUIA_PARA_EL_MANEJO_FITOSANITARIO_DE_LA_CA_A_DE_AZ_CAR.pdf",
+      "suffix": ".pdf",
+      "text_chars": 11636,
+      "chunks": 17
+    },
+    {
+      "source": "21052_417.pdf",
+      "suffix": ".pdf",
+      "text_chars": 23176,
+      "chunks": 34
+    },
+    {
+      "source": "23182_4671.pdf",
+      "suffix": ".pdf",
+      "text_chars": 10282,
+      "chunks": 15
+    },
+    {
+      "source": "6. La mancha roja.pdf",
+      "suffix": ".pdf",
+      "text_chars": 12499,
+      "chunks": 18
+    },
+    {
+      "source": "8-1.pdf",
+      "suffix": ".pdf",
+      "text_chars": 30929,
+      "chunks": 45
+    },
+    {
+      "source": "8-1a.pdf",
+      "suffix": ".pdf",
+      "text_chars": 30929,
+      "chunks": 45
+    },
+    {
+      "source": "81212_67186.pdf",
+      "suffix": ".pdf",
+      "text_chars": 62155,
+      "chunks": 89
+    },
+    {
+      "source": "amarillamiento_yellow_cana.md",
+      "suffix": ".md",
+      "text_chars": 1414,
+      "chunks": 3
+    },
+    {
+      "source": "AnOverviewofMajorFungalDiseasesofSugarcaneinIndia.pdf",
+      "suffix": ".pdf",
+      "text_chars": 92360,
+      "chunks": 132
+    },
+    {
+      "source": "cartilla-cana-ICA.pdf",
+      "suffix": ".pdf",
+      "text_chars": 86011,
+      "chunks": 123
+    },
+    {
+      "source": "Cartilla_Plagas-de-la-cana-de-azucar-en-Colombia_05-01-2026.pdf",
+      "suffix": ".pdf",
+      "text_chars": 54900,
+      "chunks": 79
+    },
+    {
+      "source": "CUARENTENA PLAGAS-Y-ENFERMEDADES-EXOTICAS-DE-LA-CAÑA-DE-AZÚCAR.pdf",
+      "suffix": ".pdf",
+      "text_chars": 18007,
+      "chunks": 26
+    },
+    {
+      "source": "DE00006_EXAMENCOMPLEXIVO.pdf",
+      "suffix": ".pdf",
+      "text_chars": 27884,
+      "chunks": 40
+    },
+    {
+      "source": "Dialnet-ManejoDeLaNutricionVariedadesYEnfermedadesFungicas-10138094.pdf",
+      "suffix": ".pdf",
+      "text_chars": 32479,
+      "chunks": 47
+    },
+    {
+      "source": "drones-06-00230.pdf",
+      "suffix": ".pdf",
+      "text_chars": 82984,
+      "chunks": 119
+    },
+    {
+      "source": "edlca.pdf",
+      "suffix": ".pdf",
+      "text_chars": 11844,
+      "chunks": 17
+    },
+    {
+      "source": "enfermedades_cana_azucar.md",
+      "suffix": ".md",
+      "text_chars": 2038,
+      "chunks": 3
+    },
+    {
+      "source": "Enfermedades_de_la_cana_de_azucar_en_Col.pdf",
+      "suffix": ".pdf",
+      "text_chars": 62279,
+      "chunks": 89
+    },
+    {
+      "source": "ENFERMEDADESOCASIONADASPORVIRUSENCAADEAZCARENELOCCIDENTEDEMXICO.pdf",
+      "suffix": ".pdf",
+      "text_chars": 49054,
+      "chunks": 71
+    },
+    {
+      "source": "EntreCaeros08_Separata_ErickChavarra.pdf",
+      "suffix": ".pdf",
+      "text_chars": 19821,
+      "chunks": 29
+    },
+    {
+      "source": "EscalasEvaluacinEnfermedades.pdf",
+      "suffix": ".pdf",
+      "text_chars": 65713,
+      "chunks": 94
+    },
+    {
+      "source": "gm_enfermedades_2016_Cartilla_didactica_No2.pdf",
+      "suffix": ".pdf",
+      "text_chars": 27085,
+      "chunks": 39
+    },
+    {
+      "source": "GUIA-DE-INSECTOS-PLAGAS-DE-LA-CANA-DE-AZUCAR.pdf",
+      "suffix": ".pdf",
+      "text_chars": 73043,
+      "chunks": 105
+    },
+    {
+      "source": "Guia-Tecnica-del-Canero-PROICSA.pdf",
+      "suffix": ".pdf",
+      "text_chars": 301268,
+      "chunks": 431
+    },
+    {
+      "source": "hoja_sana_healthy_cana.md",
+      "suffix": ".md",
+      "text_chars": 935,
+      "chunks": 2
+    },
+    {
+      "source": "httpsrepository.agrosavia.coserverapicorebitstream.pdf",
+      "suffix": ".pdf",
+      "text_chars": 23176,
+      "chunks": 34
+    },
+    {
+      "source": "IDENTI_1.PDF",
+      "suffix": ".pdf",
+      "text_chars": 11681,
+      "chunks": 17
+    },
+    {
+      "source": "Identificacion-y-reconocimiento-de-enfermedades-de-la-cana-de-azucar.pdf",
+      "suffix": ".pdf",
+      "text_chars": 11681,
+      "chunks": 17
+    },
+    {
+      "source": "libro_p265-293.pdf",
+      "suffix": ".pdf",
+      "text_chars": 62156,
+      "chunks": 89
+    },
+    {
+      "source": "MANEJO_1.PDF",
+      "suffix": ".pdf",
+      "text_chars": 27536,
+      "chunks": 40
+    },
+    {
+      "source": "manejo_integrado_enfermedades_cana.md",
+      "suffix": ".md",
+      "text_chars": 2130,
+      "chunks": 4
+    },
+    {
+      "source": "MANUAL ENFERMEDAD DE CANA.pdf",
+      "suffix": ".pdf",
+      "text_chars": 84389,
+      "chunks": 121
+    },
+    {
+      "source": "manualplagasenfs-canaazucar-mor.pdf",
+      "suffix": ".pdf",
+      "text_chars": 31372,
+      "chunks": 45
+    },
+    {
+      "source": "MonografiaMIPencaa.pdf",
+      "suffix": ".pdf",
+      "text_chars": 130896,
+      "chunks": 187
+    },
+    {
+      "source": "mosaico_cana.md",
+      "suffix": ".md",
+      "text_chars": 1411,
+      "chunks": 3
+    },
+    {
+      "source": "podredumbre_roja_redrot_cana.md",
+      "suffix": ".md",
+      "text_chars": 1405,
+      "chunks": 3
+    },
+    {
+      "source": "Principales_enfermedades_que_afectan_el_cultivo_de.pdf",
+      "suffix": ".pdf",
+      "text_chars": 30929,
+      "chunks": 45
+    },
+    {
+      "source": "RAASAfinal2022.pdf",
+      "suffix": ".pdf",
+      "text_chars": 40762,
+      "chunks": 59
+    },
+    {
+      "source": "roya_rust_cana.md",
+      "suffix": ".md",
+      "text_chars": 1521,
+      "chunks": 3
+    },
+    {
+      "source": "s41598-025-34681-1.pdf",
+      "suffix": ".pdf",
+      "text_chars": 72239,
+      "chunks": 104
+    },
+    {
+      "source": "st_30.pdf",
+      "suffix": ".pdf",
+      "text_chars": 144220,
+      "chunks": 207
+    },
+    {
+      "source": "st_38.pdf",
+      "suffix": ".pdf",
+      "text_chars": 201116,
+      "chunks": 288
+    },
+    {
+      "source": "st_40.pdf",
+      "suffix": ".pdf",
+      "text_chars": 290772,
+      "chunks": 416
+    },
+    {
+      "source": "XENbhxqtitZJdyOSemnDYflFhmVmbhuq.pdf",
+      "suffix": ".pdf",
+      "text_chars": 46534,
+      "chunks": 67
+    }
+  ],
+  "chunk_length_stats_chars": {
+    "min": 5,
+    "max": 900,
+    "mean": 891.825,
+    "median": 900.0
+  },
+  "chunk_length_stats_token_proxy": {
+    "min": 1,
+    "max": 170,
+    "mean": 66.0340909090909,
+    "median": 67.0
+  },
+  "selected_method": "bm25",
+  "production_ready": true
+}

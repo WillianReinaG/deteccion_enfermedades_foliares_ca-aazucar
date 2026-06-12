@@ -1,21 +1,30 @@
-"""Evaluación RAG con métricas proxy (CI) y RAGAS opcional (requiere OPENAI_API_KEY).
+"""Evaluación RAG para tesis de maestría.
+
+Métricas oficiales:
+    - Faithfulness
+    - Answer Relevance
+    - Hallucination Rate
+    - nDCG@5 (relevancia semántica por embeddings)
+
+Retrieval: embeddings semánticos (sentence-transformers + FAISS).
 
 Uso:
   python src/scripts/eval_rag_ragas.py
-  python src/scripts/eval_rag_ragas.py --output data/eval/rag_eval_results.json
+  python src/scripts/eval_rag_ragas.py --skip-ragas
 """
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import sys
 from pathlib import Path
+from datetime import datetime, timezone
+from typing import Any, Dict, List
 
 SRC_DIR = Path(__file__).resolve().parents[1]
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
-
-from datetime import datetime, timezone
 
 from app.agent.agent import SugarCaneAgent
 from app.config.settings import OPENAI_API_KEY
@@ -27,9 +36,13 @@ DEFAULT_OUTPUT = BASE_DIR / "data" / "eval" / "rag_eval_results.json"
 DEFAULT_CSV = BASE_DIR / "data" / "eval" / "rag_eval_results.csv"
 DEFAULT_BOOTSTRAP_CSV = BASE_DIR / "data" / "eval" / "rag_eval_bootstrap.csv"
 DEFAULT_SUMMARY = BASE_DIR / "data" / "eval" / "rag_eval_summary.txt"
+DEFAULT_ABLATION_CSV = BASE_DIR / "data" / "eval" / "rag_eval_ablation.csv"
+DEFAULT_RETRIEVAL_CSV = BASE_DIR / "data" / "eval" / "rag_eval_retrieved_chunks.csv"
+DEFAULT_CORPUS_JSON = BASE_DIR / "data" / "eval" / "rag_corpus_report.json"
+DEFAULT_CORPUS_TXT = BASE_DIR / "data" / "eval" / "rag_corpus_report.txt"
 
 
-def _try_ragas_eval(agent: SugarCaneAgent, cases: list[dict]) -> dict | None:
+def _try_ragas_eval(agent: SugarCaneAgent, cases: list[dict], k: int = 5) -> dict | None:
     if not OPENAI_API_KEY:
         return None
     try:
@@ -46,7 +59,7 @@ def _try_ragas_eval(agent: SugarCaneAgent, cases: list[dict]) -> dict | None:
             continue
         question = case["question"]
         prediction = case.get("prediction")
-        chunks = agent.retriever.search(question, k=5, prediction=prediction)
+        chunks = agent.retriever.search(question, k=k, prediction=prediction)
         contexts = [c["text"] for c in chunks]
         answer = agent.generator.generate(question, chunks, prediction)
         rows.append(
@@ -62,10 +75,7 @@ def _try_ragas_eval(agent: SugarCaneAgent, cases: list[dict]) -> dict | None:
 
     try:
         ds = Dataset.from_list(rows)
-        result = evaluate(
-            ds,
-            metrics=[faithfulness, answer_relevancy, context_precision],
-        )
+        result = evaluate(ds, metrics=[faithfulness, answer_relevancy, context_precision])
         if hasattr(result, "to_pandas"):
             df = result.to_pandas()
             return {
@@ -80,18 +90,17 @@ def _try_ragas_eval(agent: SugarCaneAgent, cases: list[dict]) -> dict | None:
 
 
 def _save_csv(path: Path, summary) -> None:
-    import csv
-
-    with path.open("w", encoding="utf-8", newline="") as f:
+    with path.open("w", encoding="utf-8-sig", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(
             [
                 "case_id",
                 "question",
                 "in_domain",
+                "retrieval_method",
                 "faithfulness",
                 "answer_relevance",
-                "context_precision",
+                "ndcg_at_5",
                 "hallucination_rate",
                 "sources",
             ]
@@ -102,25 +111,130 @@ def _save_csv(path: Path, summary) -> None:
                     r.case_id,
                     r.question,
                     r.in_domain,
+                    r.retrieval_method,
                     f"{r.faithfulness:.4f}",
                     f"{r.answer_relevance:.4f}",
-                    f"{r.context_precision:.4f}",
+                    f"{r.ndcg_at_5:.4f}",
                     f"{r.hallucination_rate:.4f}",
                     "; ".join(r.sources),
                 ]
             )
         writer.writerow([])
-        writer.writerow(["PROMEDIO (casos en dominio)", "", ""])
+        writer.writerow(["PROMEDIO (casos en dominio)"])
         writer.writerow(["faithfulness_avg", f"{summary.faithfulness_avg:.4f}"])
         writer.writerow(["answer_relevance_avg", f"{summary.answer_relevance_avg:.4f}"])
-        writer.writerow(["context_precision_avg", f"{summary.context_precision_avg:.4f}"])
+        writer.writerow(["ndcg_at_5_avg", f"{summary.ndcg_at_5_avg:.4f}"])
         writer.writerow(["hallucination_rate_avg", f"{summary.hallucination_rate_avg:.4f}"])
 
 
-def _save_bootstrap_csv(path: Path, summary) -> None:
-    import csv
+def _save_retrieved_chunks_csv(path: Path, summary) -> None:
+    with path.open("w", encoding="utf-8-sig", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(
+            [
+                "case_id",
+                "question",
+                "rank",
+                "source",
+                "chunk_id",
+                "title",
+                "diseases",
+                "score_tfidf",
+                "keyword_score",
+                "disease_boost",
+                "final_score",
+                "mmr_score",
+                "char_len",
+                "text_preview",
+            ]
+        )
+        for r in summary.results:
+            for c in r.retrieved_chunks:
+                writer.writerow(
+                    [
+                        r.case_id,
+                        r.question,
+                        c.get("rank"),
+                        c.get("source"),
+                        c.get("chunk_id"),
+                        c.get("title"),
+                        "; ".join(c.get("diseases", [])),
+                        f"{float(c.get('score', 0)):.4f}",
+                        f"{float(c.get('keyword_score', 0)):.4f}",
+                        f"{float(c.get('disease_boost', 0)):.4f}",
+                        f"{float(c.get('final_score', 0)):.4f}",
+                        f"{float(c.get('mmr_score', 0)):.4f}",
+                        c.get("char_len"),
+                        str(c.get("text", ""))[:300].replace("\n", " "),
+                    ]
+                )
 
-    with path.open("w", encoding="utf-8", newline="") as f:
+
+def _save_ablation_csv(path: Path, summary) -> None:
+    with path.open("w", encoding="utf-8-sig", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(
+            [
+                "case_id",
+                "question",
+                "in_domain",
+                "faithfulness_with_rag",
+                "faithfulness_without_rag",
+                "answer_relevance_with_rag",
+                "answer_relevance_without_rag",
+                "ndcg_at_5_with_rag",
+                "ndcg_at_5_without_rag",
+                "hallucination_rate_with_rag",
+                "hallucination_rate_without_rag",
+                "delta_faithfulness",
+                "delta_answer_relevance",
+                "delta_ndcg_at_5",
+                "delta_hallucination_rate",
+                "answer_with_rag_preview",
+                "answer_without_rag_preview",
+            ]
+        )
+        for r in summary.results:
+            if r.no_rag_answer is None:
+                continue
+            writer.writerow(
+                [
+                    r.case_id,
+                    r.question,
+                    r.in_domain,
+                    f"{r.faithfulness:.4f}",
+                    f"{float(r.no_rag_faithfulness):.4f}",
+                    f"{r.answer_relevance:.4f}",
+                    f"{float(r.no_rag_answer_relevance):.4f}",
+                    f"{r.ndcg_at_5:.4f}",
+                    f"{float(r.no_rag_ndcg_at_5 or 0.0):.4f}",
+                    f"{r.hallucination_rate:.4f}",
+                    f"{float(r.no_rag_hallucination_rate):.4f}",
+                    f"{r.faithfulness - float(r.no_rag_faithfulness):.4f}",
+                    f"{r.answer_relevance - float(r.no_rag_answer_relevance):.4f}",
+                    f"{r.ndcg_at_5 - float(r.no_rag_ndcg_at_5 or 0.0):.4f}",
+                    f"{r.hallucination_rate - float(r.no_rag_hallucination_rate):.4f}",
+                    r.answer[:300].replace("\n", " "),
+                    r.no_rag_answer[:300].replace("\n", " "),
+                ]
+            )
+        if summary.ablation:
+            writer.writerow([])
+            writer.writerow(["PROMEDIO"])
+            writer.writerow(["metric", "without_rag", "with_rag", "delta"])
+            for metric in ["faithfulness", "answer_relevance", "ndcg_at_5", "hallucination_rate"]:
+                writer.writerow(
+                    [
+                        metric,
+                        f"{summary.ablation['without_rag'][metric]:.4f}",
+                        f"{summary.ablation['with_rag'][metric]:.4f}",
+                        f"{summary.ablation['delta'][metric]:.4f}",
+                    ]
+                )
+
+
+def _save_bootstrap_csv(path: Path, summary) -> None:
+    with path.open("w", encoding="utf-8-sig", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(
             [
@@ -149,18 +263,82 @@ def _save_bootstrap_csv(path: Path, summary) -> None:
             )
 
 
-def _save_summary_txt(path: Path, summary, ragas_metrics: dict | None, failures: list[str]) -> None:
+def _save_corpus_report(agent: SugarCaneAgent, json_path: Path, txt_path: Path) -> Dict[str, Any]:
+    report = agent.retriever.corpus_report() if hasattr(agent.retriever, "corpus_report") else {}
+    json_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+
     lines = [
-        "SugarCane — Evaluación RAG conversacional",
+        "SugarCane — Reporte técnico de corpus y recuperación RAG",
         f"Fecha UTC: {datetime.now(timezone.utc).isoformat()}",
         "",
-        "=== Métricas proxy (CI / léxicas) ===",
+        f"Directorio base documental: {report.get('knowledge_dir')}",
+        f"Número de documentos: {report.get('document_count')}",
+        f"Número de chunks: {report.get('chunk_count')}",
+        "",
+        "=== Chunking ===",
+    ]
+    chunking = report.get("chunking", {})
+    lines.extend(
+        [
+            f"Estrategia: {chunking.get('strategy')}",
+            f"Chunk size: {chunking.get('chunk_size_chars')} caracteres",
+            f"Overlap: {chunking.get('chunk_overlap_chars')} caracteres",
+            f"Stride: {chunking.get('chunk_stride_chars')} caracteres",
+            "",
+            "=== Vectorización / embeddings ===",
+        ]
+    )
+    retrieval = report.get("retrieval", {})
+    backend = retrieval.get("backend", {})
+    lines.extend(
+        [
+            f"Método: {retrieval.get('method')}",
+            f"Modelo embeddings: {backend.get('model', backend.get('semantic_backend', {}).get('model', 'N/A'))}",
+            f"Índice: {backend.get('index', 'FAISS')}",
+            f"Top-K por defecto: {retrieval.get('default_top_k')}",
+            f"MMR habilitado: {retrieval.get('mmr', {}).get('enabled')}",
+            f"Pesos score: {retrieval.get('scoring_weights')}",
+            "",
+            "=== Distribución de chunks por enfermedad ===",
+        ]
+    )
+    for disease, count in sorted(report.get("disease_chunk_distribution", {}).items()):
+        lines.append(f"{disease}: {count}")
+    lines.append("")
+    lines.append("=== Estadísticas de longitud de chunks ===")
+    lines.append(str(report.get("chunk_length_stats_chars", {})))
+    txt_path.write_text("\n".join(lines), encoding="utf-8")
+    return report
+
+
+def _save_summary_txt(path: Path, summary, ragas_metrics: dict | None, failures: list[str], corpus_report: Dict[str, Any]) -> None:
+    lines = [
+        "SugarCane — Evaluación RAG conversacional ampliada",
+        f"Fecha UTC: {datetime.now(timezone.utc).isoformat()}",
+        "",
+        "=== Configuración documental y recuperación ===",
+        f"Documentos: {corpus_report.get('document_count')}",
+        f"Chunks: {corpus_report.get('chunk_count')}",
+        f"Embeddings / retrieval: {corpus_report.get('retrieval', {}).get('method')}",
+        "",
+        "=== Métricas RAG oficiales ===",
         f"faithfulness_avg:       {summary.faithfulness_avg:.4f}",
         f"answer_relevance_avg:   {summary.answer_relevance_avg:.4f}",
-        f"context_precision_avg:  {summary.context_precision_avg:.4f}",
+        f"ndcg_at_5_avg:          {summary.ndcg_at_5_avg:.4f}  (semántica por embeddings)",
         f"hallucination_rate_avg: {summary.hallucination_rate_avg:.4f}",
         "",
     ]
+    if summary.ablation:
+        lines.append("=== Ablación: sin RAG vs con RAG ===")
+        lines.append(f"{'Métrica':<24} {'Sin RAG':>10} {'Con RAG':>10} {'Delta':>10}")
+        for metric in ["faithfulness", "answer_relevance", "hallucination_rate"]:
+            lines.append(
+                f"{metric:<24} "
+                f"{summary.ablation['without_rag'][metric]:>10.4f} "
+                f"{summary.ablation['with_rag'][metric]:>10.4f} "
+                f"{summary.ablation['delta'][metric]:>10.4f}"
+            )
+        lines.append("")
     if summary.bootstrap:
         lines.append("=== Bootstrap (IC 95%, casos en dominio) ===")
         lines.append(f"{'Métrica':<22} {'Media':>8} {'DE':>8} {'IC inf':>8} {'IC sup':>8} {'n':>4}")
@@ -187,56 +365,85 @@ def _save_summary_txt(path: Path, summary, ragas_metrics: dict | None, failures:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Evaluación RAG SugarCane")
+    parser = argparse.ArgumentParser(description="Evaluación RAG SugarCane ampliada")
     parser.add_argument("--dataset", type=Path, default=DEFAULT_DATASET)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--csv", type=Path, default=DEFAULT_CSV)
     parser.add_argument("--summary", type=Path, default=DEFAULT_SUMMARY)
     parser.add_argument("--bootstrap-csv", type=Path, default=DEFAULT_BOOTSTRAP_CSV)
+    parser.add_argument("--ablation-csv", type=Path, default=DEFAULT_ABLATION_CSV)
+    parser.add_argument("--retrieval-csv", type=Path, default=DEFAULT_RETRIEVAL_CSV)
+    parser.add_argument("--corpus-json", type=Path, default=DEFAULT_CORPUS_JSON)
+    parser.add_argument("--corpus-txt", type=Path, default=DEFAULT_CORPUS_TXT)
     parser.add_argument("--n-bootstrap", type=int, default=5000, help="Réplicas bootstrap")
-    parser.add_argument("--skip-ragas", action="store_true", help="Omitir RAGAS oficial (solo métricas proxy)")
+    parser.add_argument("--k", type=int, default=5, help="Número de chunks recuperados por consulta")
+    parser.add_argument("--skip-ragas", action="store_true", help="Omitir RAGAS oficial")
+    parser.add_argument("--no-ablation", action="store_true", help="No ejecutar comparación sin RAG vs con RAG")
     args = parser.parse_args()
 
     dataset = json.loads(args.dataset.read_text(encoding="utf-8"))
     agent = SugarCaneAgent()
-    summary = evaluate_agent_cases(agent, dataset["cases"])
+
+    summary = evaluate_agent_cases(
+        agent,
+        dataset["cases"],
+        k=args.k,
+        include_ablation=not args.no_ablation,
+    )
     summary.bootstrap = bootstrap_summary(summary, n_bootstrap=args.n_bootstrap)
-    failures = check_thresholds(summary, dataset["thresholds"])
+    failures = check_thresholds(summary, dataset.get("thresholds", {}))
+
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    corpus_report = _save_corpus_report(agent, args.corpus_json, args.corpus_txt)
+
+    ragas_metrics = None if args.skip_ragas else _try_ragas_eval(agent, dataset["cases"], k=args.k)
 
     payload = {
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+        "metrics": ["faithfulness", "answer_relevance", "hallucination_rate", "ndcg_at_5"],
+        "retrieval_method": summary.retrieval_method,
         "proxy_metrics": summary.to_dict(),
-        "thresholds": dataset["thresholds"],
+        "thresholds": dataset.get("thresholds", {}),
         "threshold_failures": failures,
-        "ragas_metrics": None,
+        "corpus_report": corpus_report,
+        "ragas_metrics": ragas_metrics,
+        "methodological_note": (
+            "Métricas RAG oficiales del proyecto. nDCG@5 usa relevancia semántica "
+            "(similitud coseno entre embeddings de consulta y fragmento). "
+            "Retrieval: sentence-transformers multilingüe + FAISS."
+        ),
     }
-    args.output.parent.mkdir(parents=True, exist_ok=True)
+
     args.output.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     _save_csv(args.csv, summary)
+    _save_retrieved_chunks_csv(args.retrieval_csv, summary)
+    _save_ablation_csv(args.ablation_csv, summary)
     _save_bootstrap_csv(args.bootstrap_csv, summary)
-    _save_summary_txt(args.summary, summary, None, failures)
+    _save_summary_txt(args.summary, summary, ragas_metrics, failures, corpus_report)
 
-    ragas_metrics = None if args.skip_ragas else _try_ragas_eval(agent, dataset["cases"])
-    payload["ragas_metrics"] = ragas_metrics
-    args.output.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    _save_summary_txt(args.summary, summary, ragas_metrics, failures)
-
-    print("=== Evaluación RAG (métricas proxy — alineadas con RAGAS) ===")
+    print("=== Evaluación RAG (métricas oficiales) ===")
+    print(f"retrieval_method:       {summary.retrieval_method}")
     print(f"faithfulness_avg:       {summary.faithfulness_avg:.3f}")
     print(f"answer_relevance_avg:   {summary.answer_relevance_avg:.3f}")
-    print(f"context_precision_avg:  {summary.context_precision_avg:.3f}")
+    print(f"ndcg_at_5_avg:          {summary.ndcg_at_5_avg:.3f}")
     print(f"hallucination_rate_avg: {summary.hallucination_rate_avg:.3f}")
-    if summary.bootstrap:
-        print("\n=== Bootstrap (IC 95%) ===")
-        for stat in summary.bootstrap:
+    if summary.ablation:
+        print("\n=== Ablación sin RAG vs con RAG ===")
+        for metric in ["faithfulness", "answer_relevance", "hallucination_rate"]:
             print(
-                f"{stat.metric}: media={stat.mean:.4f}, DE={stat.std:.4f}, "
-                f"IC=[{stat.ci_lower:.4f}, {stat.ci_upper:.4f}], n={stat.n_samples}"
+                f"{metric}: sin_RAG={summary.ablation['without_rag'][metric]:.4f}, "
+                f"con_RAG={summary.ablation['with_rag'][metric]:.4f}, "
+                f"delta={summary.ablation['delta'][metric]:.4f}"
             )
-    print(f"\nJSON:      {args.output}")
-    print(f"CSV:       {args.csv}")
-    print(f"Bootstrap: {args.bootstrap_csv}")
-    print(f"Resumen:   {args.summary}")
+    print("\nArchivos generados:")
+    print(f"JSON:              {args.output}")
+    print(f"CSV métricas:      {args.csv}")
+    print(f"CSV chunks:        {args.retrieval_csv}")
+    print(f"CSV ablación:      {args.ablation_csv}")
+    print(f"CSV bootstrap:     {args.bootstrap_csv}")
+    print(f"Corpus JSON:       {args.corpus_json}")
+    print(f"Corpus TXT:        {args.corpus_txt}")
+    print(f"Resumen:           {args.summary}")
 
     if ragas_metrics:
         print("\n=== RAGAS (LLM juez) ===")

@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from typing import List, Dict, Optional
 import re
 import requests
@@ -34,6 +35,12 @@ Cuando la evidencia lo permita, estructura la respuesta así:
 5. Limitaciones del análisis y recomendación de validación en campo por agrónomo.
 """.strip()
 
+NO_RAG_SYSTEM_PROMPT = """
+Eres un agrónomo especializado en caña de azúcar. Este modo se usa únicamente para evaluación experimental
+de ablación SIN recuperación documental. Responde con tu conocimiento general, sin citar evidencia RAG.
+Si no estás seguro, advierte la limitación. No inventes dosis, productos comerciales ni normativas.
+""".strip()
+
 RESPONSE_INSTRUCTIONS = """
 INSTRUCCIONES DE RESPUESTA:
 1. Responde directamente a la pregunta, sin plantillas genéricas.
@@ -43,6 +50,14 @@ INSTRUCCIONES DE RESPUESTA:
 5. No inventes fuentes, dosis exactas ni tratamientos no respaldados por el contexto.
 6. Si la pregunta no es sobre caña de azúcar, enfermedades foliares, manejo agronómico o el diagnóstico asistido del sistema, recházala educadamente.
 7. No respondas temas ajenos (política, medicina humana, otros cultivos sin evidencia en el contexto, etc.).
+""".strip()
+
+NO_RAG_RESPONSE_INSTRUCTIONS = """
+INSTRUCCIONES DE RESPUESTA PARA MODO SIN RAG:
+1. Responde usando conocimiento general, sin usar documentos recuperados.
+2. No cites fuentes ni fragmentos documentales.
+3. Mantén una advertencia breve indicando que la respuesta no está sustentada por recuperación documental.
+4. No inventes dosis, productos comerciales o diagnósticos confirmados.
 """.strip()
 
 
@@ -73,7 +88,8 @@ def build_context(chunks: List[Dict]) -> str:
         title = c.get("title", "")
         diseases = ", ".join(c.get("diseases", [])) or "general"
         blocks.append(
-            f"[Fuente: {c['source']} | sección: {title} | enfermedades: {diseases} | relevancia: {c.get('final_score', c.get('score', 0)):.3f}]\n{c['text']}"
+            f"[Fuente: {c['source']} | sección: {title} | enfermedades: {diseases} | "
+            f"relevancia: {c.get('final_score', c.get('score', 0)):.3f}]\n{c['text']}"
         )
     return "\n\n".join(blocks)
 
@@ -83,6 +99,25 @@ def build_history(history: List[Dict] | None, max_turns: int = 8) -> str:
         return "Sin histórico previo."
     recent = history[-max_turns:]
     return "\n".join(f"{m.get('role','user')}: {m.get('content','')[:600]}" for m in recent)
+
+
+def build_prediction_text(prediction: Optional[Dict]) -> str:
+    pred_txt = "No hay imagen clasificada en esta sesión."
+    if prediction:
+        gradcam_note = ""
+        if prediction.get("gradcam_image") is not None:
+            gradcam_note = (
+                f"\nExplicabilidad Grad-CAM disponible para clase {prediction.get('gradcam_class')}: "
+                "el modelo concentró atención en las regiones resaltadas en rojo/amarillo de la imagen."
+            )
+        pred_txt = (
+            f"Clase predicha por imagen: {prediction.get('class_name')}\n"
+            f"Confianza: {prediction.get('confidence', 0):.2%}\n"
+            f"Modelo: {prediction.get('model_id')} | Framework: {prediction.get('framework')}\n"
+            f"Top predicciones: {prediction.get('top_predictions')}"
+            f"{gradcam_note}"
+        )
+    return pred_txt
 
 
 def build_user_prompt(
@@ -105,6 +140,29 @@ PREGUNTA DEL USUARIO:
 {question}
 
 {RESPONSE_INSTRUCTIONS}
+""".strip()
+
+
+def build_no_rag_prompt(
+    question: str,
+    hist: str,
+    pred_txt: str,
+) -> str:
+    return f"""
+HISTÓRICO RECIENTE:
+{hist}
+
+CLASIFICACIÓN ACTUAL (visión por computador):
+{pred_txt}
+
+MODO EXPERIMENTAL SIN RAG:
+No se proporcionan fragmentos documentales recuperados. Esta respuesta se usará únicamente para comparar
+un modelo generativo sin recuperación contra el sistema RAG.
+
+PREGUNTA DEL USUARIO:
+{question}
+
+{NO_RAG_RESPONSE_INSTRUCTIONS}
 """.strip()
 
 
@@ -136,35 +194,50 @@ def _extract_relevant_sentences(question: str, chunks: List[Dict], max_sentences
 
 
 class AnswerGenerator:
-    def generate(self, question: str, chunks: List[Dict], prediction: Optional[Dict] = None, history: List[Dict] | None = None) -> str:
+    def generate(
+        self,
+        question: str,
+        chunks: List[Dict],
+        prediction: Optional[Dict] = None,
+        history: List[Dict] | None = None,
+    ) -> str:
+        """Genera respuesta CON RAG usando fragmentos recuperados."""
         context = build_context(chunks)
         hist = build_history(history)
-        pred_txt = "No hay imagen clasificada en esta sesión."
-        if prediction:
-            gradcam_note = ""
-            if prediction.get("gradcam_image") is not None:
-                gradcam_note = (
-                    f"\nExplicabilidad Grad-CAM disponible para clase {prediction.get('gradcam_class')}: "
-                    "el modelo concentró atención en las regiones resaltadas en rojo/amarillo de la imagen."
-                )
-            pred_txt = (
-                f"Clase predicha por imagen: {prediction.get('class_name')}\n"
-                f"Confianza: {prediction.get('confidence', 0):.2%}\n"
-                f"Modelo: {prediction.get('model_id')} | Framework: {prediction.get('framework')}\n"
-                f"Top predicciones: {prediction.get('top_predictions')}"
-                f"{gradcam_note}"
-            )
+        pred_txt = build_prediction_text(prediction)
         user_prompt = build_user_prompt(question, context, hist, pred_txt)
 
-        openai = self._try_openai(user_prompt)
+        openai = self._try_openai(user_prompt, system_prompt=SYSTEM_PROMPT)
         if openai:
             return openai
-        ollama = self._try_ollama(user_prompt)
+        ollama = self._try_ollama(user_prompt, system_prompt=SYSTEM_PROMPT)
         if ollama:
             return ollama
         return self._fallback(question, chunks, prediction)
 
-    def _try_openai(self, user_prompt: str) -> Optional[str]:
+    def generate_without_rag(
+        self,
+        question: str,
+        prediction: Optional[Dict] = None,
+        history: List[Dict] | None = None,
+    ) -> str:
+        """Genera respuesta SIN RAG para experimento de ablación.
+
+        Se usa para comparar el aporte de la recuperación documental frente al LLM sin contexto.
+        """
+        hist = build_history(history)
+        pred_txt = build_prediction_text(prediction)
+        user_prompt = build_no_rag_prompt(question, hist, pred_txt)
+
+        openai = self._try_openai(user_prompt, system_prompt=NO_RAG_SYSTEM_PROMPT)
+        if openai:
+            return openai
+        ollama = self._try_ollama(user_prompt, system_prompt=NO_RAG_SYSTEM_PROMPT)
+        if ollama:
+            return ollama
+        return self._fallback_no_rag(question, prediction)
+
+    def _try_openai(self, user_prompt: str, system_prompt: str = SYSTEM_PROMPT) -> Optional[str]:
         if not OPENAI_API_KEY:
             return None
         try:
@@ -173,7 +246,7 @@ class AnswerGenerator:
             r = client.chat.completions.create(
                 model=OPENAI_MODEL,
                 messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt},
                 ],
                 temperature=0.15,
@@ -182,11 +255,11 @@ class AnswerGenerator:
         except Exception:
             return None
 
-    def _try_ollama(self, user_prompt: str) -> Optional[str]:
+    def _try_ollama(self, user_prompt: str, system_prompt: str = SYSTEM_PROMPT) -> Optional[str]:
         if OPENAI_API_KEY:
             return None
         try:
-            full_prompt = f"{SYSTEM_PROMPT}\n\n{user_prompt}"
+            full_prompt = f"{system_prompt}\n\n{user_prompt}"
             r = requests.post(
                 f"{OLLAMA_BASE_URL}/api/generate",
                 json={"model": OLLAMA_MODEL, "prompt": full_prompt, "stream": False},
@@ -205,8 +278,8 @@ class AnswerGenerator:
 
         intro = (
             "**Respuesta basada en la base de conocimiento local (sin LLM generativo)**\n\n"
-            "Como agrónomo de apoyo, indico que esta respuesta se limita estrictamente a los fragmentos "
-            "recuperados de la base documental. No sustituye una inspección de campo.\n\n"
+            "Esta respuesta se limita estrictamente a los fragmentos recuperados de la base documental. "
+            "No sustituye una inspección de campo.\n\n"
         )
         if disease:
             intro += (
@@ -230,3 +303,22 @@ class AnswerGenerator:
             "Si la afectación progresa, consulte a un agrónomo o laboratorio fitosanitario."
         )
         return (intro + body + footer).strip()
+
+    def _fallback_no_rag(self, question: str, prediction: Optional[Dict]) -> str:
+        disease = prediction.get("class_name") if prediction else None
+        conf = prediction.get("confidence", 0) if prediction else 0
+        intro = (
+            "**Respuesta experimental sin RAG**\n\n"
+            "Esta respuesta no utiliza fragmentos documentales recuperados; se genera solo para comparar "
+            "el comportamiento del sistema con y sin recuperación aumentada.\n\n"
+        )
+        if disease:
+            intro += (
+                f"La imagen fue clasificada como **{disease}** ({conf:.1%} de confianza). "
+                "Esta inferencia debe validarse en campo.\n\n"
+            )
+        return (
+            intro
+            + "No se dispone de evidencia documental recuperada en este modo. Para una recomendación técnica "
+            + "sustentada, use el modo RAG con base de conocimiento agronómica."
+        ).strip()
